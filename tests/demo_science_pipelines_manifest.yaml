@@ -1,0 +1,10 @@
+refs: ['master']
+build_id: 'b1'
+doc_repo:
+    url: 'https://github.com/lsst-sqre/pipelines_docs.git'
+    ref: 'master'
+packages:
+    afw:
+        dirname: '/mnt/stack_docs/lsstsw/stack/Linux64/afw/2015_10.0-14-g7c5ed66'
+        url: 'https://github.com/lsst-sqre/pipelines_doc.git'
+        ref: 'master'

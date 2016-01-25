@@ -38,12 +38,7 @@ class Product(object):
         """Git clones the Sphinx documentation repository for this build
         product (specified in the :attr:`manifest`) into :attr:`build_dir`.
         """
-        # Clone
-        git_clone = sh.git.bake(_cwd=self.build_dir)
-        git_clone.clone(manifest.doc_repo_url, self.doc_dir)
-
-        # Checkout the appropriate branch
-        git = sh.git.bake(_cwd=self.doc_dir)
+        pass
 
     def link_package_repos(self):
         """Link the doc/ directories of packages into the ``lsstsw``

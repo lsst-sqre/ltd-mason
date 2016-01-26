@@ -37,6 +37,10 @@ class Product(object):
         """Directory path of the cloned documentation repository."""
         return os.path.join(self.build_dir, self.manifest.doc_repo_name)
 
+    @property
+    def html_dir(self):
+        return os.path.join(self.doc_dir, '_build', 'html')
+
     def clone_doc_repo(self):
         """Git clones the Sphinx documentation repository for this build
         product (specified in the :attr:`manifest`) into :attr:`build_dir`.
@@ -90,5 +94,11 @@ class Product(object):
                            os.path.join(target_doc_dir, entity))
 
     def build_sphinx(self):
-        """Run the Sphinx build process to produce HTML documentation."""
-        pass
+        """Run the Sphinx build process to produce HTML documentation.
+
+        This method calls ``sphinx-build``, which is installed by Sphinx.
+        """
+        builder = sh.Command('sphinx-build')
+        builder(self.doc_dir, self.html_dir,
+                b='html',  # HTML builder
+                a=True)  # build all, without caching

@@ -89,3 +89,18 @@ def test_link_package_repos(demo_science_pipelines_manifest):
             assert os.path.exists(link_name)
 
     shutil.rmtree(build_dir)
+
+
+def test_sphinx_build(demo_science_pipelines_manifest):
+    manifest = Manifest(demo_science_pipelines_manifest)
+
+    build_dir = tempfile.mkdtemp()
+
+    product = Product(manifest, build_dir)
+    product.clone_doc_repo()
+    product.link_package_repos()
+    product.build_sphinx()
+
+    assert os.path.exists(os.path.join(product.doc_dir, '_build', 'html'))
+
+    shutil.rmtree(build_dir)

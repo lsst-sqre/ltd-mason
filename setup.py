@@ -42,4 +42,9 @@ setup(
     install_requires=['future', 'ruamel.yaml', 'sh'],
     tests_require=['pytest'],
     # package_data={},
+    entry_points={
+        'console_scripts': [
+            'ltd-mason = ltdmason.cli:run_ltd_mason',
+        ]
+    }
 )

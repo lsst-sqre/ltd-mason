@@ -6,6 +6,30 @@ LSST the Docs: Mason
 It is a part of the **LSST the Docs** (LTD) service for continuous documentation deployment.
 You can learn more about LTD in our `SQR-006`_ technote.
 
+Installation
+============
+
+Mason is intended to work with either Python 2.7, 3.4, or 3.5.
+It *must* run from the same Python as the software being documented, however.
+
+::
+
+   pip install -r requirements.txt
+   python setup.py install
+
+Usage
+=====
+
+Mason is intended to be used as a command line app, ``ltd-mason``.
+A YAML-encoded manifest file tells ``ltd-mason`` what documentation to built, and where to find individual LSST Stack packages built by lsstsw_.
+The manifest's schema is described in `SQR-006`_, and examples are also available here in the :file:`tests/` directory.
+
+Typical usage is::
+
+   ltd-mason --manifest manifest.yaml
+
+Run ``ltd-mason --help`` for more information.
+
 ****
 
 Copyright 2016 AURA/LSST.
@@ -13,3 +37,4 @@ Copyright 2016 AURA/LSST.
 License: MIT.
 
 .. _SQR-006: http://sqr-006.lsst.io
+.. _lsstsw: https://github.com/lsst/lsstsw

@@ -1,3 +1,4 @@
 future==0.15.2
 pytest==2.8.7
 ruamel.yaml==0.10.17
+sh==1.11

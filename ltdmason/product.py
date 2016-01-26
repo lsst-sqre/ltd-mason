@@ -3,9 +3,11 @@
 
 from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
-from builtins import super, str
+from builtins import *
 from future.standard_library import install_aliases
 install_aliases()
+
+import os
 
 import sh
 
@@ -30,6 +32,7 @@ class Product(object):
         self.manifest = manifest
         self.build_dir = build_dir
 
+    @property
     def doc_dir(self):
         """Directory path of the cloned documentation repository."""
         return os.path.join(self.build_dir, self.manifest.doc_repo_name)
@@ -38,7 +41,13 @@ class Product(object):
         """Git clones the Sphinx documentation repository for this build
         product (specified in the :attr:`manifest`) into :attr:`build_dir`.
         """
-        pass
+        # Clone
+        git_clone = sh.git.bake(_cwd=self.build_dir)
+        git_clone.clone(self.manifest.doc_repo_url, self.doc_dir)
+
+        # Checkout the appropriate ref
+        git = sh.git.bake(_cwd=self.doc_dir)
+        git.checkout(self.manifest.doc_repo_ref)
 
     def link_package_repos(self):
         """Link the doc/ directories of packages into the ``lsstsw``

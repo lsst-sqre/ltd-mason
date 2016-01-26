@@ -52,8 +52,42 @@ class Product(object):
     def link_package_repos(self):
         """Link the doc/ directories of packages into the ``lsstsw``
         checked-out documunetation repository.
+
+        The ``doc/_static/<pkgname>`` of each package is linked to the
+        ``_static/<pkgname>/`` directory in the documentation repository.
+
+        All other content of the package's ``doc/`` directory is linked into
+        the ``<pkgname>/`` directory in the root of the documentation repo.
         """
-        pass
+        doc_static_dir = os.path.join(self.doc_dir, '_static')
+        if not os.path.exists(doc_static_dir):
+            os.makedirs(doc_static_dir)
+
+        for package_name, package_data in self.manifest.packages.items():
+            pkg_dir = str(package_data['dirname'])
+
+            # Link _static/<pkgname>
+            pkg_static_dir = os.path.join(pkg_dir, 'doc', '_static',
+                                          package_name)
+            try:
+                os.symlink(pkg_static_dir,
+                           os.path.join('_static', package_name))
+            except OSError:
+                # No package _static doc dir
+                pass
+
+            # Link all other entities in the doc/ directory to the package's
+            # directory in the documentation repo
+            target_doc_dir = os.path.join(self.doc_dir, package_name)
+            if not os.path.exists(target_doc_dir):
+                os.makedirs(target_doc_dir)
+            source_doc_dir = os.path.join(pkg_dir, 'doc')
+            # for root, dirs, files in os.walk('python/Lib/email'):
+            for entity in os.listdir(source_doc_dir):
+                if entity == '_static':
+                    continue
+                os.symlink(os.path.join(source_doc_dir, entity),
+                           os.path.join(target_doc_dir, entity))
 
     def build_sphinx(self):
         """Run the Sphinx build process to produce HTML documentation."""

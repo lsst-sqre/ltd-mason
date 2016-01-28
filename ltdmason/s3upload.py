@@ -5,6 +5,8 @@ from builtins import *
 from future.standard_library import install_aliases
 install_aliases()
 
+import os
+
 import boto3
 
 
@@ -96,10 +98,11 @@ class ObjectManager(object):
     """
     def __init__(self, bucket, version_slug):
         super().__init__()
+        self._bucket = bucket
         self._version_slug = version_slug
-        if not self._version_slug.endswith('/'):
-            self._version_slug = self._version_slug + '/'
-        self._objects = self._bucket.objects.filter(Prefix=self._version_slug)
+        # Strip trailing '/' from version_slug for comparisons
+        if self._version_slug.endswith('/'):
+            self._version_slug = self._version_slug.rstrip('/')
 
     def list_filenames_in_directory(self, dirname):
         """List all file-type object names that exist at the root of this
@@ -116,7 +119,17 @@ class ObjectManager(object):
             List of file names (`str`), relative to ``version_slug/``, that
             exist at the root of ``dirname``.
         """
-        return []
+        prefix = self._create_prefix(dirname)
+        filenames = []
+        for obj in self._bucket.objects.filter(Prefix=prefix):
+            if obj.key.endswith('/'):
+                continue
+            obj_dirname = os.path.dirname(obj.key)
+            if obj_dirname == prefix:
+                # object is at root of directory
+                filenames.append(os.path.relpath(obj.key,
+                                                 start=prefix))
+        return filenames
 
     def list_dirnames_in_directory(self, dirname):
         """List all names of directories that exist at the root of this
@@ -136,7 +149,28 @@ class ObjectManager(object):
             List of directory names (`str`), relative to ``version_slug/``,
             that exist at the root of ``dirname``.
         """
-        return []
+        prefix = self._create_prefix(dirname)
+        dirnames = []
+        for obj in self._bucket.objects.filter(Prefix=prefix):
+            if obj.key.endswith('/'):
+                # object is a S3 directory object
+                dir_parts = obj.key.rstrip('/').split('/')
+                # check that directory is at root of dirname
+                base_dir = '/'.join(dir_parts[:-1])
+                if base_dir == prefix:
+                    dirnames.append(os.path.relpath(obj.key,
+                                                    start=prefix))
+        return dirnames
+
+    def _create_prefix(self, dirname):
+        if dirname in ('.', '/'):
+            dirname = ''
+        # Strips trailing slash from dir prefix for comparisons
+        # os.dirname() returns directory names without a trailing /
+        prefix = os.path.join(self._version_slug, dirname)
+        if prefix.endswith('/'):
+            prefix = prefix.rstrip('/')
+        return prefix
 
     def delete_file(self, filename):
         """Delete a file from the bucket.

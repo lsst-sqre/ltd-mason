@@ -79,7 +79,9 @@ def _upload_file(local_path, bucket_path, bucket):
     bucket : `boto3` Bucket instance
         S3 bucket.
     """
-    pass
+    obj = bucket.Object(bucket_path)
+    # no return status from the upload_file api
+    obj.upload_file(local_path)
 
 
 class ObjectManager(object):

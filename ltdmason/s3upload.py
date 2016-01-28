@@ -180,7 +180,15 @@ class ObjectManager(object):
         filename : str
             Name of the file, relative to ``version_slug/``.
         """
-        pass
+        key = os.path.join(self._version_slug, filename)
+        objects = list(self._bucket.objects.filter(Prefix=key))
+        assert len(objects) == 1
+        obj = objects[0]
+        r = obj.delete()
+        status_code = r['ResponseMetadata']['HTTPStatusCode']
+        if status_code >= 300:
+            raise S3Error('S3 could not delete {0} (status {1:d})'.format(
+                key, status_code))
 
     def delete_directory(self, dirname):
         """Delete a directory (and contents) from the bucket.
@@ -190,4 +198,25 @@ class ObjectManager(object):
         dirname : str
             Name of the directory, relative to ``version_slug/``.
         """
-        pass
+        key = os.path.join(self._version_slug, dirname)
+        if key.endswith('/'):
+            key += '/'
+
+        delete_keys = {'Objects': []}
+        key_objects = [{'Key': obj.key}
+                       for obj in self._bucket.objects.filter(Prefix=key)]
+        assert len(key_objects) > 0
+        delete_keys['Objects'] = key_objects
+        # based on http://stackoverflow.com/a/34888103
+        s3 = boto3.resource('s3')
+        r = s3.meta.client.delete_objects(Bucket=self._bucket.name,
+                                          Delete=delete_keys)
+        status_code = r['ResponseMetadata']['HTTPStatusCode']
+        if status_code >= 300:
+            raise S3Error('S3 could not delete {0} (status {1:d})'.format(
+                key, status_code))
+
+
+class S3Error(Exception):
+    """General errors in S3 API usage."""
+    pass

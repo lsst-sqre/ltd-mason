@@ -91,6 +91,12 @@ class Product(object):
                 os.symlink(os.path.join(source_doc_dir, entity),
                            os.path.join(target_doc_dir, entity))
 
+    def install_dependencies(self):
+        """Install dependencies specific in the doc repo's requirements.txt"""
+        if os.path.exists(os.path.join(self.doc_dir, 'requirements.txt')):
+            pip = sh.pip.bake(_cwd=self.doc_dir)
+            pip.install('-r', 'requirements.txt')
+
     def build_sphinx(self):
         """Run the Sphinx build process to produce HTML documentation.
 

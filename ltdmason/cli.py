@@ -42,6 +42,7 @@ def run_ltd_mason():
     product = Product(manifest, build_dir)
     product.clone_doc_repo()
     product.link_package_repos()
+    product.install_dependencies()
     product.build_sphinx()
 
     if not args.no_upload:

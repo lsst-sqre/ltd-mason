@@ -1,6 +1,6 @@
 from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
-from builtins import *
+from builtins import *  # NOQA
 from future.standard_library import install_aliases
 install_aliases()
 
@@ -48,6 +48,8 @@ def test_clone_doc_repo(demo_science_pipelines_manifest):
     shutil.rmtree(build_dir)
 
 
+@pytest.mark.skipif(os.getenv('STACK_AFW') is None,
+                    reason='Requires $STACK_AFW to be set')
 def test_link_package_repos(demo_science_pipelines_manifest):
     manifest = Manifest(demo_science_pipelines_manifest)
 
@@ -91,6 +93,8 @@ def test_link_package_repos(demo_science_pipelines_manifest):
     shutil.rmtree(build_dir)
 
 
+@pytest.mark.skipif(os.getenv('STACK_AFW') is None,
+                    reason='Requires $STACK_AFW to be set')
 def test_sphinx_build(demo_science_pipelines_manifest):
     manifest = Manifest(demo_science_pipelines_manifest)
 

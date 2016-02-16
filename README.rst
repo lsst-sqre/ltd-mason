@@ -30,6 +30,27 @@ Typical usage is::
 
 Run ``ltd-mason --help`` for more information.
 
+Testing
+=======
+
+Unit and integration tests are available.
+
+Unit tests
+----------
+
+Developers can run unit tests via `pytest <http://pytest.org>`_::
+
+   py.test
+
+To run the full set of tests, the :envvar:`STACK_AFW` environment variable should be set to the path of the installed ``afw`` package in the ``lsstsw/stack`` directory.
+Some tests will be skipped if :envvar:`STACK_AFW` is not set.
+
+Integration tests
+-----------------
+
+We have separate integration tests to exercise code that interacts with AWS S3.
+See :file:`aws_demo/README.rst`.
+
 ****
 
 Copyright 2016 AURA/LSST.

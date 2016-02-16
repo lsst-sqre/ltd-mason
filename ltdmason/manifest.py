@@ -69,7 +69,13 @@ class Manifest(object):
         Package data is a dict with keys:
 
         - ``'dirname'``: directory where the package was installed by lsstsw.
+          Any environment variables in ``'dirname'`` will be expanded.
         - ``'url'``: Git repository URL.
         - ``'ref'``: Git reference for package (branch, commit, tag).
         """
-        return self.data['packages']
+        data = {}
+        for pkg_name, pkg_data in self.data['pkgs'].iteritems():
+            pkg_data = dict(pkg_data)
+            pkg_data['dirname'] = os.path.expandvars(pkg_data['dirname'])
+            data[pkg_name] = pkg_data
+        return data

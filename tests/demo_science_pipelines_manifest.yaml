@@ -5,6 +5,9 @@ doc_repo:
     ref: 'master'
 packages:
     afw:
-        dirname: '/mnt/stack_docs/lsstsw/stack/Linux64/afw/2015_10.0-14-g7c5ed66'
+        # Set ${STACK_AFW} to the path of the built/installed afw package
+        # in order for tests to run.
+        # dirname: '/mnt/stack_docs/lsstsw/stack/Linux64/afw/2015_10.0-14-g7c5ed66'
+        dirname: '${STACK_AFW}'
         url: 'https://github.com/lsst-sqre/pipelines_doc.git'
         ref: 'master'

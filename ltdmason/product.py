@@ -3,15 +3,13 @@
 
 from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
-from builtins import *
+from builtins import *  # NOQA
 from future.standard_library import install_aliases
 install_aliases()
 
 import os
 
 import sh
-
-from .manifest import Manifest
 
 
 class Product(object):

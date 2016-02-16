@@ -34,7 +34,7 @@ def test_clone_doc_repo(demo_science_pipelines_manifest):
     #     assert os.path.exists(product.doc_dir)
 
     build_dir = tempfile.mkdtemp()
-    
+
     product = Product(manifest, build_dir)
     product.clone_doc_repo()
     assert os.path.exists(product.doc_dir)
@@ -52,7 +52,7 @@ def test_link_package_repos(demo_science_pipelines_manifest):
     manifest = Manifest(demo_science_pipelines_manifest)
 
     build_dir = tempfile.mkdtemp()
-    
+
     product = Product(manifest, build_dir)
     product.clone_doc_repo()
     product.link_package_repos()

@@ -7,7 +7,7 @@ software can be found, and metadata about the versioning of this Stack.
 
 from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
-from builtins import *
+from builtins import *  # NOQA
 from future.standard_library import install_aliases
 install_aliases()
 
@@ -19,7 +19,7 @@ import ruamel.yaml
 
 class Manifest(object):
     """Representation of a YAML-encoded manifest for an LSST stack product.
-    
+
     Parameters
     ----------
     yaml_data : str

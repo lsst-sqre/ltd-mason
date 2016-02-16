@@ -6,8 +6,12 @@ from future.standard_library import install_aliases
 install_aliases()
 
 import os
+import logging
 
 import boto3
+
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 def upload(bucket_name, path_prefix, source_dir):
@@ -33,13 +37,14 @@ def upload(bucket_name, path_prefix, source_dir):
         The contents of this directory are uploaded into the ``/path_prefix/``
         directory of the S3 bucket.
     """
+    log.info('s3upload.upload({0}, {1}, {2})'.format(
+        bucket_name, path_prefix, source_dir))
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket_name)
 
     manager = ObjectManager(bucket, path_prefix)
 
     for (rootdir, dirnames, filenames) in os.walk(source_dir):
-        print('Local directory: {0}'.format(rootdir))
         # name of root directory on S3 bucket
         bucket_root = os.path.relpath(rootdir, start=source_dir)
         if bucket_root in ('.', '/'):
@@ -49,6 +54,8 @@ def upload(bucket_name, path_prefix, source_dir):
         bucket_dirnames = manager.list_dirnames_in_directory(bucket_root)
         for bucket_dirname in bucket_dirnames:
             if bucket_dirname not in dirnames:
+                log.info(('Deleting bucket directory {0}'.format(
+                    bucket_dirname)))
                 manager.delete_directory(bucket_dirname)
 
         # Delete files that no longer exist in source
@@ -56,12 +63,14 @@ def upload(bucket_name, path_prefix, source_dir):
         for bucket_filename in bucket_filenames:
             if bucket_filename not in filenames:
                 bucket_filename = os.path.join(bucket_root, bucket_filename)
+                log.info('Deleting bucket file {0}'.format(bucket_filename))
                 manager.delete_file(bucket_filename)
 
         # Upload files in directory
         for filename in filenames:
             local_path = os.path.join(rootdir, filename)
             bucket_path = os.path.join(path_prefix, bucket_root, filename)
+            log.info('Uploading to {0}'.format(bucket_path))
             _upload_file(local_path, bucket_path, bucket)
 
 

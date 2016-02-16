@@ -1,7 +1,7 @@
 """S3 upload/sync utilities."""
 from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
-from builtins import *
+from builtins import *  # NOQA
 from future.standard_library import install_aliases
 install_aliases()
 
@@ -10,11 +10,11 @@ import os
 import boto3
 
 
-def upload(bucket_name, version_slug, source_dir):
+def upload(bucket_name, path_prefix, source_dir):
     """Upload built documentation to S3.
 
     This function places the contents of the Sphinx HTML build directory
-    into the ``/version_slug/`` directory of an *existing* S3 bucket.
+    into the ``/path_prefix/`` directory of an *existing* S3 bucket.
     Existing files on S3 are overwritten; files that no longer exist in the
     ``source_dir`` are deleted from S3.
 
@@ -26,18 +26,17 @@ def upload(bucket_name, version_slug, source_dir):
     ----------
     bucket_name : str
         Name of the S3 bucket where documentation is uploaded.
-    version_slug : str
-        The version slug is the name root directory in the bucket where
-        documentation is stored.
+    path_prefix : str
+        The root directory in the bucket where documentation is stored.
     source_dir : str
         Path of the Sphinx HTML build directory on the local file system.
-        The contents of this directory are uploaded into the ``/version_slug/``
+        The contents of this directory are uploaded into the ``/path_prefix/``
         directory of the S3 bucket.
     """
     s3 = boto3.resource('s3')
     bucket = s3.Bucket(bucket_name)
 
-    manager = ObjectManager(bucket, version_slug)
+    manager = ObjectManager(bucket, path_prefix)
 
     for (rootdir, dirnames, filenames) in os.walk(source_dir):
         print('Local directory: {0}'.format(rootdir))
@@ -62,7 +61,7 @@ def upload(bucket_name, version_slug, source_dir):
         # Upload files in directory
         for filename in filenames:
             local_path = os.path.join(rootdir, filename)
-            bucket_path = os.path.join(version_slug, bucket_root, filename)
+            bucket_path = os.path.join(path_prefix, bucket_root, filename)
             _upload_file(local_path, bucket_path, bucket)
 
 
@@ -85,7 +84,7 @@ def _upload_file(local_path, bucket_path, bucket):
 
 
 class ObjectManager(object):
-    """Manage objects existing in a bucket under a specific ``version_slug``.
+    """Manage objects existing in a bucket under a specific ``bucket_root``.
 
     The ObjectManager maintains information about objects that exist in the
     bucket, and can delete objects that no longer exist in the source.
@@ -94,17 +93,17 @@ class ObjectManager(object):
     ----------
     bucket : `boto3` Bucket instance
         S3 bucket.
-    version_slug : str
+    bucket_root : str
         The version slug is the name root directory in the bucket where
         documentation is stored.
     """
-    def __init__(self, bucket, version_slug):
+    def __init__(self, bucket, bucket_root):
         super().__init__()
         self._bucket = bucket
-        self._version_slug = version_slug
-        # Strip trailing '/' from version_slug for comparisons
-        if self._version_slug.endswith('/'):
-            self._version_slug = self._version_slug.rstrip('/')
+        self._bucket_root = bucket_root
+        # Strip trailing '/' from bucket_root for comparisons
+        if self._bucket_root.endswith('/'):
+            self._bucket_root = self._bucket_root.rstrip('/')
 
     def list_filenames_in_directory(self, dirname):
         """List all file-type object names that exist at the root of this
@@ -113,12 +112,12 @@ class ObjectManager(object):
         Parameters
         ----------
         dirname : str
-            Directory name in the bucket relative to ``version_slug/``.
+            Directory name in the bucket relative to ``bucket_root/``.
 
         Returns
         -------
         filenames : list
-            List of file names (`str`), relative to ``version_slug/``, that
+            List of file names (`str`), relative to ``bucket_root/``, that
             exist at the root of ``dirname``.
         """
         prefix = self._create_prefix(dirname)
@@ -143,12 +142,12 @@ class ObjectManager(object):
         Parameters
         ----------
         dirname : str
-            Directory name in the bucket relative to ``version_slug``.
+            Directory name in the bucket relative to ``bucket_root``.
 
         Returns
         -------
         dirnames : list
-            List of directory names (`str`), relative to ``version_slug/``,
+            List of directory names (`str`), relative to ``bucket_root/``,
             that exist at the root of ``dirname``.
         """
         prefix = self._create_prefix(dirname)
@@ -169,7 +168,7 @@ class ObjectManager(object):
             dirname = ''
         # Strips trailing slash from dir prefix for comparisons
         # os.dirname() returns directory names without a trailing /
-        prefix = os.path.join(self._version_slug, dirname)
+        prefix = os.path.join(self._bucket_root, dirname)
         if prefix.endswith('/'):
             prefix = prefix.rstrip('/')
         return prefix
@@ -180,9 +179,9 @@ class ObjectManager(object):
         Parameters
         ----------
         filename : str
-            Name of the file, relative to ``version_slug/``.
+            Name of the file, relative to ``bucket_root/``.
         """
-        key = os.path.join(self._version_slug, filename)
+        key = os.path.join(self._bucket_root, filename)
         objects = list(self._bucket.objects.filter(Prefix=key))
         assert len(objects) == 1
         obj = objects[0]
@@ -198,10 +197,10 @@ class ObjectManager(object):
         Parameters
         ----------
         dirname : str
-            Name of the directory, relative to ``version_slug/``.
+            Name of the directory, relative to ``bucket_root/``.
         """
-        key = os.path.join(self._version_slug, dirname)
-        if key.endswith('/'):
+        key = os.path.join(self._bucket_root, dirname)
+        if not key.endswith('/'):
             key += '/'
 
         delete_keys = {'Objects': []}

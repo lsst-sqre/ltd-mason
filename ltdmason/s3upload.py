@@ -153,14 +153,14 @@ class ObjectManager(object):
         prefix = self._create_prefix(dirname)
         dirnames = []
         for obj in self._bucket.objects.filter(Prefix=prefix):
-            if obj.key.endswith('/'):
-                # object is a S3 directory object
-                dir_parts = obj.key.rstrip('/').split('/')
-                # check that directory is at root of dirname
-                base_dir = '/'.join(dir_parts[:-1])
-                if base_dir == prefix:
-                    dirnames.append(os.path.relpath(obj.key,
-                                                    start=prefix))
+            dirname = os.path.dirname(obj.key)
+            rel_dirname = os.path.relpath(dirname, start=prefix)
+            dir_parts = rel_dirname.split('/')
+            if len(dir_parts) == 1:
+                dirnames.append(dir_parts[0])
+        dirnames = list(set(dirnames))
+        if '.' in dirnames:
+            dirnames.remove('.')
         return dirnames
 
     def _create_prefix(self, dirname):

@@ -63,19 +63,46 @@ class Manifest(object):
         return os.path.splitext(parts.path)[0].split('/')[-1]
 
     @property
+    def product_name(self):
+        """Name of the documentation product."""
+        return self.data['product_name']
+
+    @property
+    def build_id(self):
+        """Build identifier (`str`)."""
+        return self.data['build_id']
+
+    @property
+    def requester_github_handle(self):
+        """GitHub username handle of person who triggered the build. `None`
+        if not available.
+        """
+        if 'requester_github_handle' in self.data:
+            return self.data['requester_github_handle']
+        else:
+            return None
+
+    @property
+    def refs(self):
+        """`list` of Git refs that define the overal version set of the
+        products.
+        """
+        return self.data['refs']
+
+    @property
     def packages(self):
-        """Dictionary of package names as keys and data as values.
+        """Dictionary of package names as keys and package data as values.
 
         Package data is a dict with keys:
 
-        - ``'dirname'``: directory where the package was installed by lsstsw.
+        - ``'dir'``: directory where the package was installed by lsstsw.
           Any environment variables in ``'dirname'`` will be expanded.
         - ``'url'``: Git repository URL.
         - ``'ref'``: Git reference for package (branch, commit, tag).
         """
         data = {}
-        for pkg_name, pkg_data in self.data['pkgs'].iteritems():
+        for pkg_name, pkg_data in self.data['packages'].iteritems():
             pkg_data = dict(pkg_data)
-            pkg_data['dirname'] = os.path.expandvars(pkg_data['dirname'])
+            pkg_data['dir'] = os.path.expandvars(pkg_data['dir'])
             data[pkg_name] = pkg_data
         return data

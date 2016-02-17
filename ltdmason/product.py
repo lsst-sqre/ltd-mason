@@ -66,7 +66,7 @@ class Product(object):
             os.makedirs(doc_static_dir)
 
         for package_name, package_data in self.manifest.packages.items():
-            pkg_dir = str(package_data['dirname'])
+            pkg_dir = str(package_data['dir'])
 
             # Link _static/<pkgname>
             pkg_static_dir = os.path.join(pkg_dir, 'doc', '_static',

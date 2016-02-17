@@ -2,7 +2,7 @@
 
 from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
-from builtins import *
+from builtins import *  # NOQA
 from future.standard_library import install_aliases
 install_aliases()
 
@@ -33,7 +33,7 @@ def test_manifest_parse(demo_science_pipelines_manifest):
     assert 'url' in manifest.data['doc_repo']
     assert 'ref' in manifest.data['doc_repo']
     assert 'afw' in manifest.data['packages']
-    assert 'dirname' in manifest.data['packages']['afw']
+    assert 'dir' in manifest.data['packages']['afw']
     assert 'url' in manifest.data['packages']['afw']
     assert 'ref' in manifest.data['packages']['afw']
 

@@ -16,6 +16,7 @@ import ruamel.yaml
 
 from .manifest import Manifest
 from .product import Product
+from .uploader import upload_via_keeper
 
 
 def run_ltd_mason():
@@ -35,8 +36,6 @@ def run_ltd_mason():
             manifest_data = f.read()
     manifest = Manifest(manifest_data)
 
-    configs = read_configs(args.config_path)
-
     # FIXME replace with a context
     build_dir = tempfile.mkdtemp()
 
@@ -44,6 +43,11 @@ def run_ltd_mason():
     product.clone_doc_repo()
     product.link_package_repos()
     product.build_sphinx()
+
+    if not args.no_upload:
+        configs = read_configs(args.config_path)
+        upload_via_keeper(manifest, product,
+                          configs['keeper_url'], configs['keeper_token'])
 
     shutil.rmtree(build_dir)
 
@@ -84,6 +88,12 @@ def parse_args():
         '--config',
         dest='config_path',
         help='Path to ltd-mason configuration file (default `~/.ltdmason`)')
+    parser.add_argument(
+        '--no-upload',
+        dest='no_upload',
+        default=False,
+        action='store_true',
+        help='Skip the upload to S3 and ltd-keeper; only build the docs')
     args, unknown_args = parser.parse_known_args()
     return args, unknown_args
 

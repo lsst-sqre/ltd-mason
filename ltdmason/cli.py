@@ -15,6 +15,7 @@ import shutil
 import logging
 
 import ruamel.yaml
+import requests
 
 from .manifest import Manifest
 from .product import Product
@@ -56,10 +57,13 @@ def run_ltd_mason():
     product.install_dependencies()
     product.build_sphinx()
 
+
     if not args.no_upload:
         configs = read_configs(args.config_path)
+        get_keeper_token(configs['keeper_url'],
+                         configs['keeper_username'], configs['keeper_token'])
         upload_via_keeper(manifest, product,
-                          configs['keeper_url'], configs['keeper_token'])
+                          configs['keeper_url'], keeper_token)
 
     if args.build_dir is None:
         shutil.rmtree(build_dir)
@@ -88,7 +92,8 @@ def parse_args():
             YAML-formatted with fields
 
                keeper_url: '<URL of ltd-keeper instance>'
-               keeper_token: '<auth token from ltd-keeper instance>'
+               keeper_user: '<username ltd-keeper instance>'
+               keeper_password: '<username ltd-keeper instance>'
             """),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='See https://github.com/lsst-sqre/ltd-mason')
@@ -132,8 +137,22 @@ def read_configs(config_path):
         raise RuntimeError('No config {0} in {1}'.format(
             'keeper_url', config_path))
 
-    if 'keeper_token' not in config_data:
+    if 'keeper_user' not in config_data:
         raise RuntimeError('No config {0} in {1}'.format(
-            'keeper_token', config_path))
+            'keeper_user', config_path))
+
+    if 'keeper_password' not in config_data:
+        raise RuntimeError('No config {0} in {1}'.format(
+            'keeper_password', config_path))
 
     return config_data
+
+
+def get_keeper_token(base_url, username, password):
+    """Get a temporary auth token from ltd-keeper."""
+    token_endpoint = base_url + '/token'
+    r = requests.get(token_endpoint, auth=(username, password))
+    if r.status_code != 200:
+        raise RuntimeError('Could not authenticate to {0}: error {1:d}\n{2}'.
+                           format(base_url, r.status_code, r.json()))
+    return r.json()['token']

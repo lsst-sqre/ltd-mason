@@ -57,13 +57,14 @@ def run_ltd_mason():
     product.install_dependencies()
     product.build_sphinx()
 
-
     if not args.no_upload:
         configs = read_configs(args.config_path)
-        get_keeper_token(configs['keeper_url'],
-                         configs['keeper_username'], configs['keeper_token'])
+        keeper_token = get_keeper_token(configs['keeper_url'],
+                                        configs['keeper_username'],
+                                        configs['keeper_password'])
         upload_via_keeper(manifest, product,
-                          configs['keeper_url'], keeper_token)
+                          configs['keeper_url'], keeper_token,
+                          configs['aws_profile'])
 
     if args.build_dir is None:
         shutil.rmtree(build_dir)
@@ -92,8 +93,12 @@ def parse_args():
             YAML-formatted with fields
 
                keeper_url: '<URL of ltd-keeper instance>'
-               keeper_user: '<username ltd-keeper instance>'
-               keeper_password: '<username ltd-keeper instance>'
+               keeper_username: '<username for ltd-keeper instance>'
+               keeper_password: '<password for ltd-keeper instance>'
+               aws_profile: '<AWS profile in ~/.aws/credentials>'
+
+            See the Boto3 config guide (http://bit.ly/1WuF7rY) for info
+            on adding your AWS credentials.
             """),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='See https://github.com/lsst-sqre/ltd-mason')
@@ -137,13 +142,17 @@ def read_configs(config_path):
         raise RuntimeError('No config {0} in {1}'.format(
             'keeper_url', config_path))
 
-    if 'keeper_user' not in config_data:
+    if 'keeper_username' not in config_data:
         raise RuntimeError('No config {0} in {1}'.format(
-            'keeper_user', config_path))
+            'keeper_username', config_path))
 
     if 'keeper_password' not in config_data:
         raise RuntimeError('No config {0} in {1}'.format(
             'keeper_password', config_path))
+
+    if 'aws_profile' not in config_data:
+        # Assume default profile
+        config_data['aws_profile'] = 'default'
 
     return config_data
 

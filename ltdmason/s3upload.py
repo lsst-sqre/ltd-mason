@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
 
-def upload(bucket_name, path_prefix, source_dir):
+def upload(bucket_name, path_prefix, source_dir, aws_profile_name):
     """Upload built documentation to S3.
 
     This function places the contents of the Sphinx HTML build directory
@@ -23,7 +23,9 @@ def upload(bucket_name, path_prefix, source_dir):
     ``source_dir`` are deleted from S3.
 
     S3 credentials are assumed to be stored in a place where boto3 can read
-    them, such as :file:`~/.aws/credentials`.
+    them, such as :file:`~/.aws/credentials`. `aws_profile_name` allows you
+    to select while AWS credential profile you wish to use from the
+    :file:`~/.aws/credentials`.
     See http://boto3.readthedocs.org/en/latest/guide/quickstart.html.
 
     Parameters
@@ -36,10 +38,14 @@ def upload(bucket_name, path_prefix, source_dir):
         Path of the Sphinx HTML build directory on the local file system.
         The contents of this directory are uploaded into the ``/path_prefix/``
         directory of the S3 bucket.
+    aws_profile_name : str
+        Name of AWS profile in :file:`~/.aws/credentials`.
     """
     log.info('s3upload.upload({0}, {1}, {2})'.format(
         bucket_name, path_prefix, source_dir))
-    s3 = boto3.resource('s3')
+
+    session = boto3.session.Session(profile_name=aws_profile_name)
+    s3 = session.resource('s3')
     bucket = s3.Bucket(bucket_name)
 
     manager = ObjectManager(bucket, path_prefix)

@@ -2,3 +2,4 @@
 keeper_url: 'http://localhost:5000'
 keeper_username: 'user'
 keeper_password: 'pass'
+aws_profile: 'default'

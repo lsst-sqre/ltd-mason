@@ -16,7 +16,8 @@ log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
 
-def upload_via_keeper(manifest, product, keeper_url, keeper_token):
+def upload_via_keeper(manifest, product, keeper_url, keeper_token,
+                      aws_profile_name):
     """Upload built documentation to S3 via ltd-keeper.
 
     Parameters
@@ -29,6 +30,8 @@ def upload_via_keeper(manifest, product, keeper_url, keeper_token):
         URL of the ltd-keeper HTTP API service.
     keeper_token : str
         Authorization token for the ltd-keeper instance.
+    aws_profile_name : str
+        Name of AWS profile in :file:`~/.aws/credentials`.
     """
     # Register the documentation build for this product
     r = requests.post(
@@ -47,7 +50,8 @@ def upload_via_keeper(manifest, product, keeper_url, keeper_token):
     # Upload documentation site to S3
     upload(build_info['bucket_name'],
            build_info['bucket_root_dir'],
-           product.html_dir)
+           product.html_dir,
+           aws_profile_name)
     log.info('Upload complete: {0}:{1}'.format(
         build_info['bucket_name'], build_info['bucket_root_dir']))
 

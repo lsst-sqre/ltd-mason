@@ -1,0 +1,4 @@
+# these configs assume you're running a local ltd-keeper in development mode
+keeper_url: 'http://localhost:5000'
+keeper_username: 'user'
+keeper_password: 'pass'

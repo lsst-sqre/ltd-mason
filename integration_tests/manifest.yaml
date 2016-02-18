@@ -1,0 +1,15 @@
+product_name: 'lsst_apps'
+build_id: 'b1925'
+refs: ['u/jonathansick/DM-4195']
+requester_github_handle: 'jonathansick'
+doc_repo:
+    url: 'https://github.com/lsst-sqre/pipelines_docs.git'
+    ref: 'tickets/DM-4196'
+packages:
+    afw:
+        # Set ${STACK_AFW} to the path of the built/installed afw package
+        # in order for tests to run.
+        # dir: '/mnt/stack_docs/lsstsw/stack/Linux64/afw/2015_10.0-14-g7c5ed66'
+        dir: '${STACK_AFW}'
+        url: 'https://github.com/lsst/afw.git'
+        ref: 'u/jonathansick/DM-4195'

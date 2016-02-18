@@ -11,6 +11,7 @@ import sys
 from io import open
 import tempfile
 import shutil
+import logging
 
 import ruamel.yaml
 
@@ -26,6 +27,7 @@ def run_ltd_mason():
     responsible for running the full documentation build and upload
     process.
     """
+    logging.basicConfig(level=logging.INFO)
     args, unknown_args = parse_args()
     if args.manifest_path is None:
         # Read manifest from stdin

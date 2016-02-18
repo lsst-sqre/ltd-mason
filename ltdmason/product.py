@@ -8,8 +8,13 @@ from future.standard_library import install_aliases
 install_aliases()
 
 import os
+import logging
+from io import BytesIO
 
 import sh
+
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 class Product(object):
@@ -44,12 +49,24 @@ class Product(object):
         product (specified in the :attr:`manifest`) into :attr:`build_dir`.
         """
         # Clone
+        clone_out_log = BytesIO()
+        clone_err_log = BytesIO()
         git_clone = sh.git.bake(_cwd=self.build_dir)
-        git_clone.clone(self.manifest.doc_repo_url, self.doc_dir)
+        git_clone.clone(self.manifest.doc_repo_url, self.doc_dir,
+                        _out=clone_out_log,
+                        _err=clone_err_log)
+        log.info(clone_out_log.getvalue())
+        log.info(clone_err_log.getvalue())
 
         # Checkout the appropriate ref
+        checkout_out_log = BytesIO()
+        checkout_err_log = BytesIO()
         git = sh.git.bake(_cwd=self.doc_dir)
-        git.checkout(self.manifest.doc_repo_ref)
+        git.checkout(self.manifest.doc_repo_ref,
+                     _out=checkout_out_log,
+                     _err=checkout_err_log)
+        log.info(checkout_out_log.getvalue())
+        log.info(checkout_err_log.getvalue())
 
     def link_package_repos(self):
         """Link the doc/ directories of packages into the ``lsstsw``
@@ -72,8 +89,9 @@ class Product(object):
             pkg_static_dir = os.path.join(pkg_dir, 'doc', '_static',
                                           package_name)
             try:
-                os.symlink(pkg_static_dir,
-                           os.path.join('_static', package_name))
+                target = os.path.join('_static', package_name)
+                log.debug('Linking {0} to {1}'.format(pkg_static_dir, target))
+                os.symlink(pkg_static_dir, target)
             except OSError:
                 # No package _static doc dir
                 pass
@@ -88,14 +106,22 @@ class Product(object):
             for entity in os.listdir(source_doc_dir):
                 if entity == '_static':
                     continue
-                os.symlink(os.path.join(source_doc_dir, entity),
-                           os.path.join(target_doc_dir, entity))
+                src = os.path.join(source_doc_dir, entity)
+                target = os.path.join(target_doc_dir, entity)
+                log.debug('Linking {0} to {1}'.format(src, target))
+                os.symlink(src, target)
 
     def install_dependencies(self):
         """Install dependencies specific in the doc repo's requirements.txt"""
         if os.path.exists(os.path.join(self.doc_dir, 'requirements.txt')):
+            pip_out_log = BytesIO()
+            pip_err_log = BytesIO()
             pip = sh.pip.bake(_cwd=self.doc_dir)
-            pip.install('-r', 'requirements.txt')
+            pip.install('-r', 'requirements.txt',
+                        _out=pip_out_log,
+                        _err=pip_err_log)
+            log.info(pip_out_log.getvalue())
+            log.info(pip_err_log.getvalue())
 
     def build_sphinx(self):
         """Run the Sphinx build process to produce HTML documentation.
@@ -103,6 +129,12 @@ class Product(object):
         This method calls ``sphinx-build``, which is installed by Sphinx.
         """
         builder = sh.Command('sphinx-build')
+        build_out_log = BytesIO()
+        build_err_log = BytesIO()
         builder(self.doc_dir, self.html_dir,
                 b='html',  # HTML builder
-                a=True)  # build all, without caching
+                a=True,  # build all, without caching
+                _out=build_out_log,
+                _err=build_err_log)
+        log.info(build_out_log.getvalue())
+        log.info(build_err_log.getvalue())

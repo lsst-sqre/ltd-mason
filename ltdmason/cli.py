@@ -5,6 +5,7 @@ from builtins import *  # NOQA
 from future.standard_library import install_aliases
 install_aliases()
 
+import os
 import argparse
 import textwrap
 import sys
@@ -38,8 +39,16 @@ def run_ltd_mason():
             manifest_data = f.read()
     manifest = Manifest(manifest_data)
 
-    # FIXME replace with a context
-    build_dir = tempfile.mkdtemp()
+    if args.build_dir is None:
+        # Use a temporary directory by default
+        build_dir = tempfile.mkdtemp()
+    else:
+        # Use a debug directory
+        build_dir = os.path.abspath(args.build_dir)
+        assert build_dir is not os.getcwd(), "--build-dir can't be CWD"
+        if os.path.exists(build_dir):
+            shutil.rmtree(build_dir)
+        os.makedirs(build_dir)
 
     product = Product(manifest, build_dir)
     product.clone_doc_repo()
@@ -52,7 +61,8 @@ def run_ltd_mason():
         upload_via_keeper(manifest, product,
                           configs['keeper_url'], configs['keeper_token'])
 
-    shutil.rmtree(build_dir)
+    if args.build_dir is None:
+        shutil.rmtree(build_dir)
 
 
 def parse_args():
@@ -97,6 +107,14 @@ def parse_args():
         default=False,
         action='store_true',
         help='Skip the upload to S3 and ltd-keeper; only build the docs')
+    parser.add_argument(
+        '--build-dir',
+        default=None,
+        dest='build_dir',
+        help='Directory to use for building the documentation. By default a '
+             'temporary directory is created an deleted. This manually-set '
+             'directory is not deleted to aid debugging. Beware that any '
+             'existing content in that directory will be deleted.')
     args, unknown_args = parser.parse_known_args()
     return args, unknown_args
 

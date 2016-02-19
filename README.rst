@@ -48,8 +48,8 @@ Some tests will be skipped if :envvar:`STACK_AFW` is not set.
 Integration tests
 -----------------
 
-We have separate integration tests to exercise code that interacts with AWS S3.
-See :file:`aws_demo/README.rst`.
+We have separate integration tests to exercise code that interacts with AWS S3 and ltd-keeper.
+See :file:`integration_tests/README.rst`.
 
 ****
 

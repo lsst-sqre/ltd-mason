@@ -5,11 +5,34 @@ Integration Tests
 In addition to unit tests, with py.test, we use integration tests to validate the end-to-end functionality of ltd-mason.
 This document describes how to set up and run these tests.
 
+Two integration tests are available:
+
+1. :ref:`s3upload_demo.py` – S3 Upload Testing
+2. :ref:`run-ltd-mason.sh` – End-to-end Testing
+
+s3upload_demo.py – S3 Upload Testing
+====================================
+
+:file:`s3upload_demo.py` validates the :mod:`ltdmason.s3upload` S3 synchronization codes.
+To run these demos, you must first add install your AWS credentials according to:
+http://boto3.readthedocs.org/en/latest/guide/quickstart.html#configuration
+
+The run
+
+.. code-block:: bash
+
+   ./s3upload_demo.py lsst-the-docs-test
+
+Files are uploaded to the ``lsst-the-docs-test`` bucket.
+
+run-ltd-mason.sh – End-to-end Testing
+=====================================
+
 Prerequisites
-=============
+-------------
 
 lsstsw Stack
-------------
+^^^^^^^^^^^^
 
 .. code-block:: bash
 
@@ -34,13 +57,13 @@ Then get a version of ``afw`` that has Sphinx documentation enabled:
 Finally, set the environment variable :envvar:`STACK_AFW` to the directory where the build ``afw`` is located in :file:`lsstsw/stack`.
 
 AWS Credentials
----------------
+^^^^^^^^^^^^^^^
 
 Add AWS credentials to the default profile (specifically, ones for lsst-sqre's account) to :file:`~/.aws/credentials`.
 See http://boto3.readthedocs.org/en/latest/guide/quickstart.html#configuration.
 
 Install ltd-mason
------------------
+^^^^^^^^^^^^^^^^^
 
 ltd-mason should be installed with the same Python as the lsstsw-based stack.
 
@@ -50,7 +73,7 @@ ltd-mason should be installed with the same Python as the lsstsw-based stack.
    python setup.py develop
 
 Start ltd-keeper in development mode
-====================================
+------------------------------------
 
 Install `ltd-keeper <https://github.com/lsst-sqre/ltd-keeper>`_.
 Note you'll need to install ltd-keeper in a Python 3.5 environment, which will probably be different from the Python environment used by lsstsw.
@@ -71,7 +94,7 @@ Then initialize a test product using the :file:`/ltd-mason/integration_tests/set
 Note that this can only be done once; to re-run the integration test you'll need to shut down the ltd-keeper server, delete the development sqlite DB, restart ltd-keeper and re-run :command:`setup_keeper.py`.
 
 Run the integration test
-========================
+------------------------
 
 The :command:`run-ltd-mason.sh` script runs ltd-mason using the :file:`config.yaml` and :file:`manifest.yaml` configuration files provided alongside it.
 

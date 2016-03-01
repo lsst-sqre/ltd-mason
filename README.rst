@@ -10,19 +10,38 @@ Installation
 ============
 
 Mason is intended to work with either Python 2.7, 3.4, or 3.5.
-It *must* run from the same Python as the software being documented, however.
+
+We recommend that you install Mason inside a `virtual environment <https://packaging.python.org/en/latest/installing/#creating-virtual-environments>`_ (such as `virtualenv <https://packaging.python.org/en/latest/projects/#virtualenv>`_ / `virtualenvwrapper <http://virtualenvwrapper.readthedocs.org>`_ on Python 2.7/3 or the built-in `pyenv <http://docs.python.org/3.4/library/venv.html>`_ for Python 3).
+
+If the Sphinx project being built uses Python introspection to build an API reference with `autodoc <http://www.sphinx-doc.org/en/stable/ext/autodoc.html>`_ or `numpydoc <https://pypi.python.org/pypi/numpydoc>`_, then the Python package being documented must be installed in the same virtual environment as Mason.
+
+Install for production
+----------------------
+
+Mason is available on PyPI:
+
+::
+
+   pip install ltd-mason
+
+Installing for development/testing
+----------------------------------
+
+Once the environment is ready, install Mason from this Git repository via:
 
 ::
 
    pip install -r requirements.txt
-   python setup.py install
+   python setup.py develop
+
+See :ref:`Testing` for information on testing.
 
 Usage
 =====
 
 Mason is intended to be used as a command line app, ``ltd-mason``.
 A YAML-encoded manifest file tells ``ltd-mason`` what documentation to built, and where to find individual LSST Stack packages built by lsstsw_.
-The manifest's schema is described in `SQR-006`_, and examples are also available here in the :file:`tests/` directory.
+The manifest's schema is described in `SQR-006`_, and examples are also available here in the :file:`tests/` and :file:`integration_tests/` directories.
 
 Typical usage is::
 
@@ -49,7 +68,7 @@ Integration tests
 -----------------
 
 We have separate integration tests to exercise code that interacts with AWS S3 and ltd-keeper.
-See :file:`integration_tests/README.rst`.
+See :file:`integration_tests/README.rst` for instructions on how to run these integration tests.
 
 ****
 

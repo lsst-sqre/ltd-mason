@@ -13,7 +13,7 @@ install_aliases()
 
 import os
 import shutil
-from tempfile import TemporaryDirectory
+# from tempfile import TemporaryDirectory
 from argparse import ArgumentParser
 import logging
 
@@ -30,7 +30,13 @@ def main():
     logging.getLogger(__name__).level = logging.INFO
 
     parser = ArgumentParser()
-    parser.add_argument('bucketname')
+    parser.add_argument(
+        'bucketname',
+        help='Name of the bucket to use for testing')
+    parser.add_argument(
+        '--aws-profile',
+        default='default',
+        help='Name of the AWS configuration profile')
     args = parser.parse_args()
 
     paths = [
@@ -50,7 +56,7 @@ def main():
 
     create_test_files(temp_dir, paths)
 
-    s3upload.upload(args.bucketname, 'aws/demo', temp_dir)
+    s3upload.upload(args.bucketname, 'aws/demo', temp_dir, ars.aws_profile)
     test_objects_exist(args.bucketname, 'aws/demo', paths)
 
     shutil.rmtree(os.path.join(temp_dir, 'dir1'))
@@ -61,7 +67,7 @@ def main():
     os.remove(os.path.join(temp_dir, 'file2.txt'))
     paths.remove('file2.txt')
 
-    s3upload.upload(args.bucketname, 'aws/demo', temp_dir)
+    s3upload.upload(args.bucketname, 'aws/demo', temp_dir, args.aws_profile)
     test_objects_exist(args.bucketname, 'aws/demo', paths)
 
     shutil.rmtree(temp_dir)

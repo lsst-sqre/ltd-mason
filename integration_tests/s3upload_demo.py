@@ -44,22 +44,27 @@ def main():
         'dir2/file22.txt',
     ]
 
-    with TemporaryDirectory() as temp_dir:
-        create_test_files(temp_dir, paths)
+    # with TemporaryDirectory() as temp_dir:
+    #    pass  # for python 3 only
+    temp_dir = tempfile.mkdtemp()
 
-        s3upload.upload(args.bucketname, 'aws/demo', temp_dir)
-        test_objects_exist(args.bucketname, 'aws/demo', paths)
+    create_test_files(temp_dir, paths)
 
-        shutil.rmtree(os.path.join(temp_dir, 'dir1'))
-        paths.remove('dir1/file11.txt')
-        paths.remove('dir1/file12.txt')
-        paths.remove('dir1/dir11/file111.txt')
-        paths.remove('dir1/dir11/file112.txt')
-        os.remove(os.path.join(temp_dir, 'file2.txt'))
-        paths.remove('file2.txt')
+    s3upload.upload(args.bucketname, 'aws/demo', temp_dir)
+    test_objects_exist(args.bucketname, 'aws/demo', paths)
 
-        s3upload.upload(args.bucketname, 'aws/demo', temp_dir)
-        test_objects_exist(args.bucketname, 'aws/demo', paths)
+    shutil.rmtree(os.path.join(temp_dir, 'dir1'))
+    paths.remove('dir1/file11.txt')
+    paths.remove('dir1/file12.txt')
+    paths.remove('dir1/dir11/file111.txt')
+    paths.remove('dir1/dir11/file112.txt')
+    os.remove(os.path.join(temp_dir, 'file2.txt'))
+    paths.remove('file2.txt')
+
+    s3upload.upload(args.bucketname, 'aws/demo', temp_dir)
+    test_objects_exist(args.bucketname, 'aws/demo', paths)
+
+    shutil.rmtree(temp_dir)
 
 
 def create_test_files(temp_dir, file_list):

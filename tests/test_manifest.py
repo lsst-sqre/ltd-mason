@@ -29,24 +29,6 @@ def test_manifest_roundtrip(demo_manifest):
     assert manifest.yaml == demo_manifest
 
 
-def test_manifest_parse(demo_manifest):
-    manifest = Manifest(demo_manifest)
-    assert manifest.data['refs'][0] == 'master'
-    assert 'url' in manifest.data['doc_repo']
-    assert 'ref' in manifest.data['doc_repo']
-    assert 'afw' in manifest.data['packages']
-    assert 'dir' in manifest.data['packages']['afw']
-    assert 'url' in manifest.data['packages']['afw']
-    assert 'ref' in manifest.data['packages']['afw']
-    assert manifest.data['product_name'] == 'lsst_apps'
-    assert manifest.data['build_id'] == 'b1'
-    assert manifest.data['requester_github_handle'] == 'jonathansick'
-    assert manifest.data['doc_repo']['url'] == 'https://github.com/lsst-sqre/pipelines_docs.git'  # NOQA
-    assert manifest.data['doc_repo']['ref'] == 'master'
-    assert manifest.data['packages']['afw']['url'] == 'https://github.com/lsst/afw.git'  # NOQA
-    assert manifest.data['packages']['afw']['ref'] == 'master'
-
-
 def test_doc_repo_data(demo_manifest):
     manifest = Manifest(demo_manifest)
     assert 'pipelines_docs' == manifest.doc_repo_name

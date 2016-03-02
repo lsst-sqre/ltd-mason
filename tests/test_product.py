@@ -67,7 +67,7 @@ def test_link_package_repos(demo_science_pipelines_manifest):
         package_dir = os.path.join(build_dir, product.manifest.doc_repo_name,
                                    str(package_name))
         print(package_dir)
-        assert os.path.exists(package_dir)
+        assert os.path.isdir(package_dir)
 
         # test that the packages doc/_static directory is linked
         package_static_dir = os.path.join(package_data['dirname'],
@@ -75,7 +75,8 @@ def test_link_package_repos(demo_science_pipelines_manifest):
         if os.path.exists(package_static_dir):
             doc_package_static_dir = os.path.join(product.doc_dir,
                                                   '_static', str(package_name))
-            assert os.path.exists(doc_package_static_dir)
+            assert os.path.islink(doc_package_static_dir)
+            assert os.path.isdir(doc_package_static_dir)
 
         # test that individual entities of a package's doc (aside from _static)
         # are linked
@@ -88,7 +89,8 @@ def test_link_package_repos(demo_science_pipelines_manifest):
             if entity == '_static':
                 continue
             link_name = os.path.join(target_dir, entity)
-            assert os.path.exists(link_name)
+            assert os.path.islink(link_name)
+            assert os.path.lexists(link_name)
 
     shutil.rmtree(build_dir)
 

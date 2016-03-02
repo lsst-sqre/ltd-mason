@@ -36,6 +36,13 @@ def test_manifest_parse(demo_science_pipelines_manifest):
     assert 'dir' in manifest.data['packages']['afw']
     assert 'url' in manifest.data['packages']['afw']
     assert 'ref' in manifest.data['packages']['afw']
+    assert manifest.data['product_name'] == 'lsst_apps'
+    assert manifest.data['build_id'] == 'b1'
+    assert manifest.data['requester_github_handle'] == 'jonathansick'
+    assert manifest.data['doc_repo']['url'] == 'https://github.com/lsst-sqre/pipelines_docs.git'  # NOQA
+    assert manifest.data['doc_repo']['ref'] == 'master'
+    assert manifest.data['packages']['afw']['url'] == 'https://github.com/lsst/afw.git'  # NOQA
+    assert manifest.data['packages']['afw']['ref'] == 'master'
 
 
 def test_doc_repo_data(demo_science_pipelines_manifest):
@@ -44,3 +51,9 @@ def test_doc_repo_data(demo_science_pipelines_manifest):
     assert 'master' == manifest.doc_repo_ref
     assert 'https://github.com/lsst-sqre/pipelines_docs.git' \
         == manifest.doc_repo_url
+    assert 'lsst_apps' == manifest.product_name
+    assert 'b1' == manifest.build_id
+    assert 'jonathansick' == manifest.requester_github_handle
+    assert ['master'] == manifest.refs
+    assert 'https://github.com/lsst/afw.git' == manifest.packages['afw']['url']
+    assert 'master' == manifest.packages['afw']['ref']

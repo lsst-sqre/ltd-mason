@@ -101,7 +101,7 @@ class Manifest(object):
         - ``'ref'``: Git reference for package (branch, commit, tag).
         """
         data = {}
-        for pkg_name, pkg_data in self.data['packages'].iteritems():
+        for pkg_name, pkg_data in self.data['packages'].items():
             pkg_data = dict(pkg_data)
             pkg_data['dir'] = os.path.expandvars(pkg_data['dir'])
             data[pkg_name] = pkg_data

@@ -14,7 +14,9 @@ install_aliases()
 from urllib.parse import urlparse
 import os
 
+import jsonschema
 import ruamel.yaml
+import pkg_resources
 
 
 class Manifest(object):
@@ -32,7 +34,9 @@ class Manifest(object):
     """
     def __init__(self, f):
         super().__init__()
-        self.data = ruamel.yaml.load(f, ruamel.yaml.RoundTripLoader)
+        data = ruamel.yaml.load(f, ruamel.yaml.RoundTripLoader)
+        Manifest.validate(data)
+        self.data = data
 
     @property
     def yaml(self):
@@ -106,3 +110,16 @@ class Manifest(object):
             pkg_data['dir'] = os.path.expandvars(pkg_data['dir'])
             data[pkg_name] = pkg_data
         return data
+
+    @classmethod
+    def validate(self, data):
+        """Validate the schema of a parsed YAML manifest."""
+        schema = load_manifest_schema()
+        jsonschema.validate(data, schema)
+
+
+def load_manifest_schema():
+    resource_args = (__name__, '../manifest_schema.yaml')
+    assert pkg_resources.resource_exists(*resource_args)
+    yaml_data = pkg_resources.resource_string(*resource_args)
+    return ruamel.yaml.load(yaml_data)

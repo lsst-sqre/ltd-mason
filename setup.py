@@ -39,7 +39,7 @@ setup(
     ],
     keywords='lsst',
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
-    install_requires=['future', 'ruamel.yaml', 'sh', 'boto3'],
+    install_requires=['future', 'ruamel.yaml', 'sh', 'boto3', 'jsonschema'],
     tests_require=['pytest'],
     # package_data={},
     entry_points={

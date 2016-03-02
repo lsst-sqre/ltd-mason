@@ -1,3 +1,4 @@
 include *.rst
 include LICENSE
 include manifest_schema.yaml
+recursive-include test_data/ *.html *.css *.git *.png *.jpg *.rst *.py Makefile

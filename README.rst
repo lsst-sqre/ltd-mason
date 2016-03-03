@@ -1,3 +1,5 @@
+.. image:: https://img.shields.io/travis/lsst-sqre/ltd-mason.svg
+
 ####################
 LSST the Docs: Mason
 ####################

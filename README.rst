@@ -34,14 +34,14 @@ Once the environment is ready, install Mason from this Git repository via:
    pip install -r requirements.txt
    python setup.py develop
 
-See :ref:`Testing` for information on testing.
+See `Testing`_ for information on running unit tests.
 
 Usage
 =====
 
 Mason is intended to be used as a command line app, ``ltd-mason``.
 A YAML-encoded manifest file tells ``ltd-mason`` what documentation to built, and where to find individual LSST Stack packages built by lsstsw_.
-The manifest's schema is described in `SQR-006`_, and examples are also available here in the :file:`tests/` and :file:`integration_tests/` directories.
+The manifest's schema is described in `SQR-006`_, and examples are also available here in the ``tests/`` and ``integration_tests/`` directories.
 
 Typical usage is::
 
@@ -61,14 +61,11 @@ Developers can run unit tests via `pytest <http://pytest.org>`_::
 
    py.test
 
-To run the full set of tests, the :envvar:`STACK_AFW` environment variable should be set to the path of the installed ``afw`` package in the ``lsstsw/stack`` directory.
-Some tests will be skipped if :envvar:`STACK_AFW` is not set.
-
 Integration tests
 -----------------
 
 We have separate integration tests to exercise code that interacts with AWS S3 and ltd-keeper.
-See :file:`integration_tests/README.rst` for instructions on how to run these integration tests.
+See ``integration_tests/README.rst`` for instructions on how to run these integration tests.
 
 ****
 

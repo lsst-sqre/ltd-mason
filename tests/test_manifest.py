@@ -16,7 +16,7 @@ from ltdmason.manifest import Manifest
 
 @pytest.fixture
 def demo_manifest():
-    resource_args = (__name__, 'demo_science_pipelines_manifest.yaml')
+    resource_args = (__name__, 'demo_manifest.yaml')
     assert pkg_resources.resource_exists(*resource_args)
     yaml_data = pkg_resources.resource_string(*resource_args)
     return yaml_data
@@ -40,6 +40,8 @@ def test_doc_repo_data(demo_manifest):
     assert 'jonathansick' == manifest.requester_github_handle
     assert ['master'] == manifest.refs
     assert 'https://github.com/lsst/afw.git' == manifest.packages['afw']['url']
+    assert '/mnt/stack_docs/lsstsw/stack/Linux64/afw/2015_10.0-14-g7c5ed66' \
+        == manifest.packages['afw']['dir']
     assert 'master' == manifest.packages['afw']['ref']
 
 

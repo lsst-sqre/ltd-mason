@@ -7,9 +7,6 @@ doc_repo:
   ref: 'master'
 packages:
   afw:
-    # Set ${STACK_AFW} to the path of the built/installed afw package
-    # in order for tests to run.
-    # dir: '/mnt/stack_docs/lsstsw/stack/Linux64/afw/2015_10.0-14-g7c5ed66'
-    dir: '${STACK_AFW}'
+    dir: '/mnt/stack_docs/lsstsw/stack/Linux64/afw/2015_10.0-14-g7c5ed66'
     url: 'https://github.com/lsst/afw.git'
     ref: 'master'

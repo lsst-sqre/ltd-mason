@@ -1,0 +1,16 @@
+product_name: 'mock-doc'
+build_id: 'b1'
+refs: ['master']
+requester_github_handle: 'jonathansick'
+doc_repo:
+  url: 'https://github.com/lsst-sqre/mock-doc.git'
+  ref: 'master'
+packages:
+  alpha:
+    dir: '../test_data/package_alpha'
+    url: 'https://github.com/lsst/afw.git'  # treat as random URL
+    ref: 'master'
+  beta:
+    dir: '../test_data/package_beta'
+    url: 'https://github.com/lsst/afw.git'  # treat as random URL
+    ref: 'master'

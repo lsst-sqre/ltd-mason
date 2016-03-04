@@ -5,25 +5,9 @@ Integration Tests
 In addition to unit tests, with py.test, we use integration tests to validate the end-to-end functionality of ltd-mason.
 This document describes how to set up and run these tests.
 
-Two integration tests are available:
+One integration test is currently available:
 
-1. :ref:`s3upload_demo.py` – S3 Upload Testing
-2. :ref:`run-ltd-mason.sh` – End-to-end Testing
-
-s3upload_demo.py – S3 Upload Testing
-====================================
-
-:file:`s3upload_demo.py` validates the :mod:`ltdmason.s3upload` S3 synchronization codes.
-To run these demos, you must first add install your AWS credentials according to:
-http://boto3.readthedocs.org/en/latest/guide/quickstart.html#configuration
-
-The run
-
-.. code-block:: bash
-
-   ./s3upload_demo.py lsst-the-docs-test
-
-Files are uploaded to the ``lsst-the-docs-test`` bucket.
+1. :ref:`run-ltd-mason.sh` – End-to-end Testing
 
 run-ltd-mason.sh – End-to-end Testing
 =====================================

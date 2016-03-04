@@ -63,6 +63,19 @@ Developers can run unit tests via `pytest <http://pytest.org>`_::
 
    py.test
 
+To run a full suite of AWS S3 integration tests, you'll need AWS credentials and an S3 bucket to test in.
+
+Set the following environment variables:
+
+``LTD_MASON_TEST_AWS_ID``
+   AWS access key ID
+
+``LTD_MASON_TEST_AWS_SECRET``
+   AWS secret access key
+
+``LTD_MASON_TEST_BUCKET``
+   Name of an S3 bucket that already exists and can be used for testing.
+
 Integration tests
 -----------------
 

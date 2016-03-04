@@ -17,7 +17,7 @@ log.addHandler(logging.NullHandler())
 
 
 def upload_via_keeper(manifest, product, keeper_url, keeper_token,
-                      aws_profile_name):
+                      aws_credentials=None):
     """Upload built documentation to S3 via ltd-keeper.
 
     Parameters
@@ -30,8 +30,25 @@ def upload_via_keeper(manifest, product, keeper_url, keeper_token,
         URL of the ltd-keeper HTTP API service.
     keeper_token : str
         Authorization token for the ltd-keeper instance.
-    aws_profile_name : str
-        Name of AWS profile in :file:`~/.aws/credentials`.
+    aws_credentials : dict, optional
+        A `dict` specifying an AWS credential configuration. There are three
+        variants:
+
+        1. Leave unset to rely on defaults in :file:`~/.aws/credentials`::
+
+        2. Runtime-specified credentials (perhaps through ltd-mason environment
+           variables)::
+
+              {'aws_access_key_id': '...',
+               'aws_secret_access_key': '...'}
+
+        3. Runtime-specific name of a profile of credentials stored in
+           :file:`~/.aws/credentials`::
+
+              {'aws_profile': '...'}
+
+        See http://boto3.readthedocs.org/en/latest/guide/configuration.html
+        for information on :file:`~/.aws/credentials`.
     """
     # Register the documentation build for this product
     r = requests.post(
@@ -48,10 +65,12 @@ def upload_via_keeper(manifest, product, keeper_url, keeper_token,
     log.info(r.json())
 
     # Upload documentation site to S3
+    if aws_credentials is None:
+        aws_credentials = {}
     upload(build_info['bucket_name'],
            build_info['bucket_root_dir'],
            product.html_dir,
-           aws_profile_name)
+           **aws_credentials)
     log.info('Upload complete: {0}:{1}'.format(
         build_info['bucket_name'], build_info['bucket_root_dir']))
 

@@ -14,7 +14,9 @@ log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
 
-def upload(bucket_name, path_prefix, source_dir, aws_profile_name):
+def upload(bucket_name, path_prefix, source_dir,
+           aws_access_key_id=None, aws_secret_access_key=None,
+           aws_profile=None):
     """Upload built documentation to S3.
 
     This function places the contents of the Sphinx HTML build directory
@@ -38,17 +40,26 @@ def upload(bucket_name, path_prefix, source_dir, aws_profile_name):
         Path of the Sphinx HTML build directory on the local file system.
         The contents of this directory are uploaded into the ``/path_prefix/``
         directory of the S3 bucket.
-    aws_profile_name : str
-        Name of AWS profile in :file:`~/.aws/credentials`.
+    aws_access_key_id : str, optional
+        The access key for your AWS account. Also set `aws_secret_access_key`.
+    aws_secret_access_key : str, optional
+        The secret key for your AWS account.
+    aws_profile : str, optional
+        Name of AWS profile in :file:`~/.aws/credentials`. Use this instead
+        of `aws_access_key_id` and `aws_secret_access_key` for file-based
+        credentials.
     """
     log.info('s3upload.upload({0}, {1}, {2})'.format(
         bucket_name, path_prefix, source_dir))
 
-    session = boto3.session.Session(profile_name=aws_profile_name)
+    session = boto3.session.Session(
+        profile_name=aws_profile,
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key)
     s3 = session.resource('s3')
     bucket = s3.Bucket(bucket_name)
 
-    manager = ObjectManager(bucket, path_prefix)
+    manager = ObjectManager(session, bucket_name, path_prefix)
 
     for (rootdir, dirnames, filenames) in os.walk(source_dir):
         # name of root directory on S3 bucket
@@ -106,14 +117,19 @@ class ObjectManager(object):
 
     Parameters
     ----------
-    bucket : `boto3` Bucket instance
-        S3 bucket.
+    session : :class:`boto3.session.Session`
+        A boto3 session instance provisioned with the correct identities.
+    bucket_name : str
+        Name of the S3 bucket.
     bucket_root : str
         The version slug is the name root directory in the bucket where
         documentation is stored.
     """
-    def __init__(self, bucket, bucket_root):
+    def __init__(self, session, bucket_name, bucket_root):
         super().__init__()
+        s3 = session.resource('s3')
+        bucket = s3.Bucket(bucket_name)
+        self._session = session
         self._bucket = bucket
         self._bucket_root = bucket_root
         # Strip trailing '/' from bucket_root for comparisons
@@ -224,7 +240,7 @@ class ObjectManager(object):
         assert len(key_objects) > 0
         delete_keys['Objects'] = key_objects
         # based on http://stackoverflow.com/a/34888103
-        s3 = boto3.resource('s3')
+        s3 = self._session.resource('s3')
         r = s3.meta.client.delete_objects(Bucket=self._bucket.name,
                                           Delete=delete_keys)
         status_code = r['ResponseMetadata']['HTTPStatusCode']

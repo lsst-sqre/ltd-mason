@@ -64,7 +64,7 @@ def run_ltd_mason():
                                         configs['keeper_password'])
         upload_via_keeper(manifest, product,
                           configs['keeper_url'], keeper_token,
-                          configs['aws_profile'])
+                          aws_credentials=configs['aws_profile'])
 
     if args.build_dir is None:
         shutil.rmtree(build_dir)

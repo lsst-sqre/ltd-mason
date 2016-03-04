@@ -113,7 +113,11 @@ def _create_test_files(temp_dir, file_list):
 
 def _write_file(root_dir, rel_path):
     filepath = os.path.join(root_dir, rel_path)
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(filepath))
+    except OSError:
+        # probably exists; pickup real error on write
+        pass
 
     with open(filepath, 'w') as f:
         f.write('Content of {0}'.format(os.path.basename(filepath)))

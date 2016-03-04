@@ -217,10 +217,9 @@ class ObjectManager(object):
         assert len(objects) == 1
         obj = objects[0]
         r = obj.delete()
-        status_code = r['ResponseMetadata']['HTTPStatusCode']
-        if status_code >= 300:
-            raise S3Error('S3 could not delete {0} (status {1:d})'.format(
-                key, status_code))
+        if 'Errors' in r:
+            log.error(r)
+            raise S3Error('S3 could not delete {0})'.format(key))
 
     def delete_directory(self, dirname):
         """Delete a directory (and contents) from the bucket.
@@ -243,10 +242,9 @@ class ObjectManager(object):
         s3 = self._session.resource('s3')
         r = s3.meta.client.delete_objects(Bucket=self._bucket.name,
                                           Delete=delete_keys)
-        status_code = r['ResponseMetadata']['HTTPStatusCode']
-        if status_code >= 300:
-            raise S3Error('S3 could not delete {0} (status {1:d})'.format(
-                key, status_code))
+        log.info(r)
+        if 'Errors' in r:
+            raise S3Error('S3 could not delete {0}'.format(key))
 
 
 class S3Error(Exception):

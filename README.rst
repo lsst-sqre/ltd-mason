@@ -35,6 +35,7 @@ Once the environment is ready, install Mason from this Git repository via:
 
 ::
 
+   git clone https://github.com/lsst-sqre/ltd-mason.git
    pip install -r requirements.txt
    python setup.py develop
 

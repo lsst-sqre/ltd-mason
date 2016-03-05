@@ -7,7 +7,9 @@ This document describes how to set up and run these tests.
 
 One integration test is currently available:
 
-1. :ref:`run-ltd-mason.sh` – End-to-end Testing
+1. `run-ltd-mason`_ – End-to-end Testing
+
+.. _run-ltd-mason:
 
 run-ltd-mason.sh – End-to-end Testing
 =====================================
@@ -15,52 +17,20 @@ run-ltd-mason.sh – End-to-end Testing
 Prerequisites
 -------------
 
-lsstsw Stack
-^^^^^^^^^^^^
+1. Install LTD Mason for development by cloning it and installing in development mode (``python setup.py develop``); see the project README.
+2. Configure AWS credentials per the project README; the integration test assumes SQuaRE's account.
+3. Configure LTD Keeper environment variables, per the project README::
 
-.. code-block:: bash
+      export LTD_KEEPER_URL=http://localhost:5000
+      export LTD_KEEPER_USER=user
+      export LTD_KEEPER_PASSWORD=pass
 
-   git clone https://github.com/lsst/lsstsw.git
-   cd lsstsw
-   ./bin/deploy
-   . bin/setup.sh
-   rebuild lsst_apps
-   eups tags --clone bNNNN current
 
-Then get a version of ``afw`` that has Sphinx documentation enabled:
-
-.. code-block:: bash
-
-   cd lsstsw/build/afw
-   git fetch
-   git checkout u/jonathansick/DM-4195
-   eups declare -r . -t $USER afw git
-   setup afw git
-   scons doc
-
-Finally, set the environment variable :envvar:`STACK_AFW` to the directory where the build ``afw`` is located in :file:`lsstsw/stack`.
-
-AWS Credentials
-^^^^^^^^^^^^^^^
-
-Add AWS credentials to the default profile (specifically, ones for lsst-sqre's account) to :file:`~/.aws/credentials`.
-See http://boto3.readthedocs.org/en/latest/guide/quickstart.html#configuration.
-
-Install ltd-mason
-^^^^^^^^^^^^^^^^^
-
-ltd-mason should be installed with the same Python as the lsstsw-based stack.
-
-.. code-block:: bash
-
-   pip install -r requirements.txt
-   python setup.py develop
-
-Start ltd-keeper in development mode
+Start LTD Keeper in development mode
 ------------------------------------
 
-Install `ltd-keeper <https://github.com/lsst-sqre/ltd-keeper>`_.
-Note you'll need to install ltd-keeper in a Python 3.5 environment, which will probably be different from the Python environment used by lsstsw.
+Install `LTD Keeper <https://github.com/lsst-sqre/ltd-keeper>`_.
+Note you'll need to install ltd-keeper in a Python 3.5 environment, which *can* be different from the Python environment that LTD Mason runs in.
 
 Start up the ltd-keeper server:
 
@@ -80,6 +50,6 @@ Note that this can only be done once; to re-run the integration test you'll need
 Run the integration test
 ------------------------
 
-The :command:`run-ltd-mason.sh` script runs ltd-mason using the :file:`config.yaml` and :file:`manifest.yaml` configuration files provided alongside it.
+The :command:`run-ltd-mason.sh` script runs ``ltd-mason`` using the ``mock_manifest.yaml`` configuration file provided in the ``tests/`` directory.
 
-You should see the documentation be built, published to ltd-keeper, and uploaded to the ``lsst-the-docs-test`` bucket.
+You should see the documentation be built, published to LTD Keeper, and uploaded to the ``lsst-the-docs-test`` bucket.

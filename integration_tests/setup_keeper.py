@@ -17,18 +17,18 @@ r = requests.get(keeper_url + '/token',
 token = r.json()['token']
 print('token {0}'.format(token))
 
-r = requests.get(keeper_url + '/v1/products/',
+r = requests.get(keeper_url + '/products/',
                  auth=(token, ''))
 print(r.json())
 
-p = {'slug': 'lsst_apps',
-     'doc_repo': 'https://github.com/lsst-sqre/pipelines_docs.git',
-     'title': 'LSST Science Pipelines',
+p = {'slug': 'mock-doc',
+     'doc_repo': 'https://github.com/lsst-sqre/mock-doc.git',
+     'title': 'Mock documentation',
      'domain': 'pipelines.ltdtest.local',
      'bucket_name': 'lsst-the-docs-test'}
-print(keeper_url + '/v1/products/')
+print(keeper_url + '/products/')
 print(p)
-r = requests.post(keeper_url + '/v1/products/',
+r = requests.post(keeper_url + '/products/',
                   json=p,
                   auth=(token, ''))
 print(r.status_code)

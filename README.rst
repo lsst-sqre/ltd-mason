@@ -56,7 +56,9 @@ YAML Manifest
 
 A YAML-encoded manifest file tells ``ltd-mason`` what documentation to build, and where to find individual packages for multi-package LSST Stack-type build.
 The manifest's schema is described in `SQR-006`_, and examples are also available here in the ``tests/`` and ``integration_tests/`` directories.
-Formally the manifest schema is define in `./manifeset_schema.yaml`_.
+Formally the manifest schema is defined in `manifest_schema.yaml`_.
+
+.. _manifest_schema.yaml: ./manifest_schema.yaml
 
 Enviroment Variables and AWS credentials
 ----------------------------------------

@@ -53,7 +53,7 @@ def upload_via_keeper(manifest, product,
     """
     # Register the documentation build for this product
     r = requests.post(
-        keeper_url + '/v1/products/{p}/builds/'.format(
+        keeper_url + '/products/{p}/builds/'.format(
             p=manifest.product_name),
         auth=(keeper_token, ''),
         json={'slug': manifest.build_id,
@@ -79,8 +79,8 @@ def upload_via_keeper(manifest, product,
     r = requests.post(
         build_url + '/uploaded',
         auth=(keeper_token, ''))
-    if r.status_code != 202:
-        raise KeeperError(r.json())
+    if r.status_code != 200:
+        raise KeeperError(r)
     log.info(r.json())
 
 

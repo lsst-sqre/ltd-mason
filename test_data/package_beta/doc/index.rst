@@ -1,6 +1,6 @@
-package_beta
-=============
+beta
+====
 
 **Good work!**
 
-.. image:: /_static/package_beta/giphy.gif
+.. image:: /_static/beta/giphy.gif

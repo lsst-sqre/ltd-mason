@@ -1,6 +1,6 @@
-package_alpha
-=============
+alpha
+=====
 
 **Congratulations!**
 
-.. image:: /_static/package_alpha/giphy.gif
+.. image:: /_static/alpha/giphy.gif

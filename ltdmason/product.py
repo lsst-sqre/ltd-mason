@@ -30,6 +30,10 @@ class Product(object):
     build_dir : str
         Directory where documentation will be built.
     """
+    # Package directories/files that won't get linked into product doc repo
+    # Note that _static/ is handled separately
+    package_excludes = ['_static', '_build', '_templates', 'conf.py']
+
     def __init__(self, manifest, build_dir):
         super().__init__()
         self.manifest = manifest
@@ -89,12 +93,14 @@ class Product(object):
             pkg_static_dir = os.path.join(pkg_dir, 'doc', '_static',
                                           package_name)
             try:
-                target = os.path.join('_static', package_name)
-                log.debug('Linking {0} to {1}'.format(pkg_static_dir, target))
+                target = os.path.join(self.doc_dir, '_static', package_name)
+                log.info('Linking {0} to {1}'.format(pkg_static_dir, target))
                 os.symlink(pkg_static_dir, target)
-            except OSError:
+            except OSError as e:
                 # No package _static doc dir
-                pass
+                log.warning('Could not find package static dir {0}'.format(
+                            pkg_static_dir))
+                log.warning(str(e))
 
             # Link all other entities in the doc/ directory to the package's
             # directory in the documentation repo
@@ -104,7 +110,9 @@ class Product(object):
             source_doc_dir = os.path.join(pkg_dir, 'doc')
             # for root, dirs, files in os.walk('python/Lib/email'):
             for entity in os.listdir(source_doc_dir):
-                if entity == '_static':
+                if entity in self.package_excludes:
+                    # skips protected dirs like _build, _templates, _static
+                    # _static is linked separately, above
                     continue
                 src = os.path.join(source_doc_dir, entity)
                 target = os.path.join(target_doc_dir, entity)

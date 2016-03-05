@@ -108,7 +108,7 @@ def test_link_package_repos(product):
         target_dir = os.path.join(product.doc_dir, str(package_name))
         for entity in os.listdir(source_dir):
             print('entity', entity)
-            if entity == '_static':
+            if entity in product.package_excludes:
                 continue
             link_name = os.path.join(target_dir, entity)
             assert os.path.islink(link_name)

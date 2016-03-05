@@ -99,13 +99,17 @@ class Manifest(object):
 
         Package data is a dict with keys:
 
-        - ``'dir'``: directory where the package was installed by lsstsw.
+        - ``'dir'``: directory where the package was installed by lsstsw. This
+          is ensured to be an absolute URL, transforming any relative paths
+          in the Manifest, assuming they are relative to the **current
+          working directory.**
         - ``'url'``: Git repository URL.
         - ``'ref'``: Git reference for package (branch, commit, tag).
         """
         data = {}
         for pkg_name, pkg_data in self.data['packages'].items():
             pkg_data = dict(pkg_data)
+            pkg_data['dir'] = os.path.abspath(pkg_data['dir'])
             data[pkg_name] = pkg_data
         return data
 

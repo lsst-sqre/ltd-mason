@@ -14,12 +14,15 @@ import tempfile
 import shutil
 import logging
 
-import ruamel.yaml
 import requests
 
 from .manifest import Manifest
 from .product import Product
 from .uploader import upload_via_keeper
+
+
+log = logging.getLogger(__name__)
+log.addHandler(logging.NullHandler())
 
 
 def run_ltd_mason():
@@ -58,13 +61,16 @@ def run_ltd_mason():
     product.build_sphinx()
 
     if not args.no_upload:
-        configs = read_configs(args.config_path)
-        keeper_token = get_keeper_token(configs['keeper_url'],
-                                        configs['keeper_username'],
-                                        configs['keeper_password'])
+        aws_credentials = read_aws_credentials()
+        keeper_credentials = read_keeper_credentials()
+        keeper_token = get_keeper_token(
+            keeper_credentials['keeper_url'],
+            keeper_credentials['keeper_username'],
+            keeper_credentials['keeper_password'])
         upload_via_keeper(manifest, product,
-                          configs['keeper_url'], keeper_token,
-                          aws_credentials=configs['aws_profile'])
+                          keeper_url=keeper_credentials['keeper_url'],
+                          keeper_token=keeper_token,
+                          aws_credentials=aws_credentials)
 
     if args.build_dir is None:
         shutil.rmtree(build_dir)
@@ -88,29 +94,42 @@ def parse_args():
 
             cat manifest.yaml | ltd-mason
 
-            ltd-mason also expects a configuration file (for working with the
-            ltd-keeper documentation coordinater. The configuration file is
-            YAML-formatted with fields
+            ltd-mason's use of Amazon S3 and LTD Keeper are configured with
+            environment variables:
 
-               keeper_url: '<URL of ltd-keeper instance>'
-               keeper_username: '<username for ltd-keeper instance>'
-               keeper_password: '<password for ltd-keeper instance>'
-               aws_profile: '<AWS profile in ~/.aws/credentials>'
+            LTD_MASON_AWS_ID
+               AWS access key ID.
 
-            See the Boto3 config guide (http://bit.ly/1WuF7rY) for info
-            on adding your AWS credentials.
+            LTD_MASON_AWS_SECRET
+               AWS secret access key.
+
+            LTD_MASON_AWS_PROFILE
+               This variable can be set as an alternative ``LTD_MASON_AWS_ID``
+               and ``LTD_MASON_AWS_SECRET``. ``LTD_MASON_AWS_PROFILE`` is the
+               name of a profile in `~/.aws/credentials` that contains your
+               secret key and ID. See the `boto3 configuration guide
+               <http://bit.ly/1WuF7rY>`_ for more information.
+
+            Note that the AWS credentials specified here must have permission
+            to read and write into the S3 buckets managed by the LTD Keeper
+            server.
+
+            LTD_KEEPER_URL
+               URL of LTD Keeper instance.
+
+            LTD_KEEPER_USER
+               Username for LTD Keeper instance.
+
+            LTD_KEEPER_PASSWORD
+               Password for LTD Keeper instance.
             """),
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='See https://github.com/lsst-sqre/ltd-mason')
+        epilog='See https://github.com/lsst-sqre/ltd-mason for more info.')
     parser.add_argument(
         '--manifest',
         dest='manifest_path',
         default=None,
         help='Path to YAML manifest file that defines the doc build.')
-    parser.add_argument(
-        '--config',
-        dest='config_path',
-        help='Path to ltd-mason configuration file (default `~/.ltdmason`)')
     parser.add_argument(
         '--no-upload',
         dest='no_upload',
@@ -129,32 +148,36 @@ def parse_args():
     return args, unknown_args
 
 
-def read_configs(config_path):
-    """Read a YAML file with ltd-mason configurations."""
-    try:
-        with open(config_path, mode='r', encoding='utf-8') as f:
-            config_data = ruamel.yaml.load(f)
-    except OSError:
-        raise OSError('Could not read configuration file at {0}'.format(
-            config_path))
+def read_aws_credentials():
+    keys = (('aws_profile', 'LTD_MASON_AWS_PROFILE'),
+            ('aws_access_key_id', 'LTD_MASON_AWS_ID'),
+            ('aws_secret_access_key', 'LTD_MASON_AWS_SECRET'))
+    c = {k: os.getenv(envvar) for (k, envvar) in keys}
+    if c['aws_access_key_id'] is not None \
+            and c['aws_secret_access_key'] is not None:
+        del c['aws_profile']
+        log.info('Using $LTD_MASON_AWS_ID and $LTD_MASON_AWS_SECRET')
+    else:
+        del c['aws_access_key_id']
+        del c['aws_secret_access_key']
+        if c['aws_profile'] is None:
+            log.info('Assuming default AWS credential setup')
+            del c['aws_profile']
+        else:
+            log.info('Using $LTD_MASON_AWS_PROFILE')
 
-    if 'keeper_url' not in config_data:
-        raise RuntimeError('No config {0} in {1}'.format(
-            'keeper_url', config_path))
+    return c
 
-    if 'keeper_username' not in config_data:
-        raise RuntimeError('No config {0} in {1}'.format(
-            'keeper_username', config_path))
 
-    if 'keeper_password' not in config_data:
-        raise RuntimeError('No config {0} in {1}'.format(
-            'keeper_password', config_path))
-
-    if 'aws_profile' not in config_data:
-        # Assume default profile
-        config_data['aws_profile'] = 'default'
-
-    return config_data
+def read_keeper_credentials():
+    keys = (('keeper_url', 'LTD_KEEPER_URL'),
+            ('keeper_username', 'LTD_KEEPER_USER'),
+            ('keeper_password', 'LTD_KEEPER_PASSWORD'))
+    c = {k: os.getenv(envvar) for (k, envvar) in keys}
+    for (k, envvar) in keys:
+        if c[k] is None:
+            raise RuntimeError('Please set {0}'.format(envvar))
+    return c
 
 
 def get_keeper_token(base_url, username, password):

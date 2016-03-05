@@ -16,7 +16,8 @@ log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
 
-def upload_via_keeper(manifest, product, keeper_url, keeper_token,
+def upload_via_keeper(manifest, product,
+                      keeper_url, keeper_token,
                       aws_credentials=None):
     """Upload built documentation to S3 via ltd-keeper.
 

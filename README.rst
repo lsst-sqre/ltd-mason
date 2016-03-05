@@ -26,8 +26,10 @@ Mason is available on PyPI:
 
    pip install ltd-mason
 
-Installing for development/testing
-----------------------------------
+Next, see the `Usage`_ section.
+
+Install for development/testing
+-------------------------------
 
 Once the environment is ready, install Mason from this Git repository via:
 
@@ -42,14 +44,51 @@ Usage
 =====
 
 Mason is intended to be used as a command line app, ``ltd-mason``.
-A YAML-encoded manifest file tells ``ltd-mason`` what documentation to built, and where to find individual LSST Stack packages built by lsstsw_.
-The manifest's schema is described in `SQR-006`_, and examples are also available here in the ``tests/`` and ``integration_tests/`` directories.
-
-Typical usage is::
+typical usage is::
 
    ltd-mason --manifest manifest.yaml
 
-Run ``ltd-mason --help`` for more information.
+See ``ltd-mason -h`` for additional options.
+
+YAML Manifest
+-------------
+
+A YAML-encoded manifest file tells ``ltd-mason`` what documentation to build, and where to find individual packages for multi-package LSST Stack-type build.
+The manifest's schema is described in `SQR-006`_, and examples are also available here in the ``tests/`` and ``integration_tests/`` directories.
+Formally the manifest schema is define in `./manifeset_schema.yaml`_.
+
+Enviroment Variables and AWS credentials
+----------------------------------------
+
+LTD Mason is configured through environment variables.
+
+Credentials for AWS S3
+^^^^^^^^^^^^^^^^^^^^^^
+
+``LTD_MASON_AWS_ID``
+   AWS access key ID.
+
+``LTD_MASON_AWS_SECRET``
+   AWS secret access key.
+
+``LTD_MASON_AWS_PROFILE``
+   This variable can be set as an alternative ``LTD_MASON_AWS_ID`` and ``LTD_MASON_AWS_SECRET``. ``LTD_MASON_AWS_PROFILE`` is the name of a profile in `~/.aws/credentials` that contains your secret key and ID. See the `boto3 configuration guide <http://bit.ly/1WuF7rY>`_ for more information.
+
+If None of these variables are configured, LTD Mason will attempt to use the `default AWS credential setup <http://bit.ly/1WuF7rY>`_ in your environment.
+
+Note that the AWS credentials specified here must have permission to read and write into the S3 buckets managed by the LTD Keeper server.
+
+Credentials for LTD Keeper
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``LTD_KEEPER_URL``
+   URL of LTD Keeper instance.
+
+``LTD_KEEPER_USER``
+   Username for LTD Keeper instance.
+
+``LTD_KEEPER_PASSWORD``
+   Password for LTD Keeper instance.
 
 Testing
 =======
@@ -64,8 +103,7 @@ Developers can run unit tests via `pytest <http://pytest.org>`_::
    py.test
 
 To run a full suite of AWS S3 integration tests, you'll need AWS credentials and an S3 bucket to test in.
-
-Set the following environment variables:
+Configure the tests to use these by setting the following environment variables:
 
 ``LTD_MASON_TEST_AWS_ID``
    AWS access key ID

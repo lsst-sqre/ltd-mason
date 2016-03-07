@@ -1,6 +1,7 @@
 future==0.15.2
 pytest==2.8.7
 requests==2.9.1
+responses==0.5.1
 ruamel.yaml==0.10.17
 sh==1.11
 boto3==1.2.3

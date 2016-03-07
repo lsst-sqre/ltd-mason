@@ -41,7 +41,7 @@ setup(
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
     install_requires=['future', 'ruamel.yaml', 'sh', 'boto3', 'jsonschema',
                       'sphinx', 'requests'],
-    tests_require=['pytest'],
+    tests_require=['pytest', 'responses'],
     # package_data={},
     entry_points={
         'console_scripts': [

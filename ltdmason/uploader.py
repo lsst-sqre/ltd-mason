@@ -117,7 +117,8 @@ def _confirm_upload(build_url, keeper_token):
     """
     r = requests.post(
         build_url + '/uploaded',
-        auth=(keeper_token, ''))
+        auth=(keeper_token, ''),
+        json={})
     if r.status_code != 200:
         raise KeeperError(r)
     log.info(r.json())

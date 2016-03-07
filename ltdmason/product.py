@@ -32,7 +32,7 @@ class Product(object):
     """
     # Package directories/files that won't get linked into product doc repo
     # Note that _static/ is handled separately
-    package_excludes = ['_static', '_build', '_templates', 'conf.py']
+    package_excludes = ['_static', '_build', '_templates', 'conf.py', '.git']
 
     def __init__(self, manifest, build_dir):
         super().__init__()

@@ -21,6 +21,13 @@ def upload_via_keeper(manifest, product,
                       aws_credentials=None):
     """Upload built documentation to S3 via ltd-keeper.
 
+    This runs a three-step pipeline:
+
+    1. Register the build on LTD Keeper with ``POST /products/<slug>/``
+    2. Upload documentation files to an appropriate location (according to
+       LTD Keeper) in an S3 bucket.
+    3. Confirm to LTD Keeper that the documentation upload is complete.
+
     Parameters
     ----------
     manifest : :class:`ltdmason.manifest.Manifest`
@@ -50,8 +57,42 @@ def upload_via_keeper(manifest, product,
 
         See http://boto3.readthedocs.org/en/latest/guide/configuration.html
         for information on :file:`~/.aws/credentials`.
+
+    Raises
+    ------
+    KeeperError
+       Any anomaly with LTD Keeper interaction.
     """
     # Register the documentation build for this product
+    build_resource = _register_build(manifest, keeper_url, keeper_token)
+    build_url = build_resource['self_url']
+
+    # Upload documentation site to S3
+    if aws_credentials is None:
+        # Fall back to using default AWS credentials the user might have set
+        aws_credentials = {}
+    upload(build_info['bucket_name'],
+           build_info['bucket_root_dir'],
+           product.html_dir,
+           **aws_credentials)
+    log.info('Upload complete: {0}:{1}'.format(
+        build_info['bucket_name'], build_info['bucket_root_dir']))
+
+    # Confirm upload to ltd-keeper
+    _confirm_upload(build_url, keeper_token)
+
+
+def _register_build(manifest, keeper_url, keeper_token):
+    """Register this documentation build with LTD Keeper
+
+    This registration step tells ltd-mason where to upload the documentation
+    files (bucket and directory).
+
+    Raises
+    ------
+    KeeperError
+       Any anomaly with LTD Keeper interaction.
+    """
     r = requests.post(
         keeper_url + '/products/{p}/builds/'.format(
             p=manifest.product_name),
@@ -62,20 +103,18 @@ def upload_via_keeper(manifest, product,
     if r.status_code != 201:
         raise KeeperError(r.json())
     build_info = r.json()
-    build_url = build_info['self_url']
     log.info(r.json())
+    return build_info
 
-    # Upload documentation site to S3
-    if aws_credentials is None:
-        aws_credentials = {}
-    upload(build_info['bucket_name'],
-           build_info['bucket_root_dir'],
-           product.html_dir,
-           **aws_credentials)
-    log.info('Upload complete: {0}:{1}'.format(
-        build_info['bucket_name'], build_info['bucket_root_dir']))
 
-    # Confirm upload to ltd-keeper
+def _confirm_upload(build_url, keeper_token):
+    """Patch the build on LTD Keeper to say that the upload is successful.
+
+    Raises
+    ------
+    KeeperError
+       Any anomaly with LTD Keeper interaction.
+    """
     r = requests.post(
         build_url + '/uploaded',
         auth=(keeper_token, ''))

@@ -89,6 +89,13 @@ class Product(object):
         for package_name, package_data in self.manifest.packages.items():
             pkg_dir = str(package_data['dir'])
 
+            # validate that the package's doc directory exists; skip if not
+            source_doc_dir = os.path.join(pkg_dir, 'doc')
+            if not os.path.isdir(source_doc_dir):
+                log.debug(
+                    'Skipping {0}: no doc/ directory'.format(package_name))
+                continue
+
             # Link _static/<pkgname>
             pkg_static_dir = os.path.join(pkg_dir, 'doc', '_static',
                                           package_name)
@@ -107,7 +114,6 @@ class Product(object):
             target_doc_dir = os.path.join(self.doc_dir, package_name)
             if not os.path.exists(target_doc_dir):
                 os.makedirs(target_doc_dir)
-            source_doc_dir = os.path.join(pkg_dir, 'doc')
             # for root, dirs, files in os.walk('python/Lib/email'):
             for entity in os.listdir(source_doc_dir):
                 if entity in self.package_excludes:

@@ -123,6 +123,27 @@ Integration tests
 We have separate integration tests to exercise code that interacts with AWS S3 and ltd-keeper.
 See ``integration_tests/README.rst`` for instructions on how to run these integration tests.
 
+Release Procedures
+==================
+
+LTD Mason is distributed with PyPI at https://pypi.python.org/pypi/ltd-mason/.
+Follow this procedure to create a new release:
+
+1. Ensure the version in ``setup.py`` is correct. Use ``x.y.z.devN`` for development versions.
+
+2. Test the metadata::
+
+      python setup.py check --metadata --restructuredtext --strict
+
+3. Build the distributions::
+   
+      rm -R dist
+      python setup.py sdist bdist_wheel
+
+4. Upload the distributions with `twine <https://pypi.python.org/pypi/twine>`_::
+
+      twine upload dist/*
+
 ****
 
 Copyright 2016 AURA/LSST.

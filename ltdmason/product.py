@@ -97,24 +97,23 @@ class Product(object):
                 continue
 
             # Link _static/<pkgname>
-            pkg_static_dir = os.path.join(pkg_dir, 'doc', '_static',
-                                          package_name)
-            try:
+            source_static_dir = os.path.join(source_doc_dir, '_static',
+                                             package_name)
+            if not os.path.isdir(source_static_dir):
+                log.debug(
+                    'No _static/ directory found for {0}; skipping'
+                    .format(package_name))
+            else:
                 target = os.path.join(self.doc_dir, '_static', package_name)
-                log.info('Linking {0} to {1}'.format(pkg_static_dir, target))
-                os.symlink(pkg_static_dir, target)
-            except OSError as e:
-                # No package _static doc dir
-                log.warning('Could not find package static dir {0}'.format(
-                            pkg_static_dir))
-                log.warning(str(e))
+                log.info(
+                    'Linking {0} to {1}'.format(source_static_dir, target))
+                os.symlink(source_static_dir, target)
 
             # Link all other entities in the doc/ directory to the package's
             # directory in the documentation repo
             target_doc_dir = os.path.join(self.doc_dir, package_name)
             if not os.path.exists(target_doc_dir):
                 os.makedirs(target_doc_dir)
-            # for root, dirs, files in os.walk('python/Lib/email'):
             for entity in os.listdir(source_doc_dir):
                 if entity in self.package_excludes:
                     # skips protected dirs like _build, _templates, _static

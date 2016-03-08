@@ -80,7 +80,15 @@ def test_read_keeper_credentials_missing(monkeypatch, missing):
 
 
 def test_read_aws_credentials_envvar(monkeypatch):
-    """Test read_aws_credentials() if through environment variables."""
+    """Test read_aws_credentials() if through environment variables.
+
+    read_aws_credentials() is challenging to test because we not only test the
+    presence of an environment variable, but also the absence. The delvar
+    monkeypatch method only removes the monkeypatched var; an actual
+    environment variable of the same name can still leak through. Instead we
+    put the logic of omitting variables into a function that replaces
+    os.getenv.
+    """
     v = {'LTD_MASON_AWS_ID': 'key-id',
          'LTD_MASON_AWS_SECRET': 'key-secret',
          'LTD_MASON_AWS_PROFILE': 'aws-profile'}

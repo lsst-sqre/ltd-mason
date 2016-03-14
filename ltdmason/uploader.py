@@ -75,7 +75,7 @@ def upload_via_keeper(manifest, product,
            build_info['bucket_root_dir'],
            product.html_dir,
            **aws_credentials)
-    log.info('Upload complete: {0}:{1}'.format(
+    log.debug('Upload complete: {0}:{1}'.format(
         build_info['bucket_name'], build_info['bucket_root_dir']))
 
     # Confirm upload to ltd-keeper
@@ -103,7 +103,7 @@ def _register_build(manifest, keeper_url, keeper_token):
     if r.status_code != 201:
         raise KeeperError(r.json())
     build_info = r.json()
-    log.info(r.json())
+    log.debug(r.json())
     return build_info
 
 
@@ -121,7 +121,7 @@ def _confirm_upload(build_url, keeper_token):
         json={})
     if r.status_code != 200:
         raise KeeperError(r)
-    log.info(r.json())
+    log.debug(r.json())
 
 
 class KeeperError(Exception):

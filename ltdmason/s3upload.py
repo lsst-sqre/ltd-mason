@@ -49,7 +49,7 @@ def upload(bucket_name, path_prefix, source_dir,
         of `aws_access_key_id` and `aws_secret_access_key` for file-based
         credentials.
     """
-    log.info('s3upload.upload({0}, {1}, {2})'.format(
+    log.debug('s3upload.upload({0}, {1}, {2})'.format(
         bucket_name, path_prefix, source_dir))
 
     session = boto3.session.Session(
@@ -71,7 +71,7 @@ def upload(bucket_name, path_prefix, source_dir,
         bucket_dirnames = manager.list_dirnames_in_directory(bucket_root)
         for bucket_dirname in bucket_dirnames:
             if bucket_dirname not in dirnames:
-                log.info(('Deleting bucket directory {0}'.format(
+                log.debug(('Deleting bucket directory {0}'.format(
                     bucket_dirname)))
                 manager.delete_directory(bucket_dirname)
 
@@ -80,14 +80,14 @@ def upload(bucket_name, path_prefix, source_dir,
         for bucket_filename in bucket_filenames:
             if bucket_filename not in filenames:
                 bucket_filename = os.path.join(bucket_root, bucket_filename)
-                log.info('Deleting bucket file {0}'.format(bucket_filename))
+                log.debug('Deleting bucket file {0}'.format(bucket_filename))
                 manager.delete_file(bucket_filename)
 
         # Upload files in directory
         for filename in filenames:
             local_path = os.path.join(rootdir, filename)
             bucket_path = os.path.join(path_prefix, bucket_root, filename)
-            log.info('Uploading to {0}'.format(bucket_path))
+            log.debug('Uploading to {0}'.format(bucket_path))
             _upload_file(local_path, bucket_path, bucket)
 
 
@@ -242,7 +242,7 @@ class ObjectManager(object):
         s3 = self._session.resource('s3')
         r = s3.meta.client.delete_objects(Bucket=self._bucket.name,
                                           Delete=delete_keys)
-        log.info(r)
+        log.debug(r)
         if 'Errors' in r:
             raise S3Error('S3 could not delete {0}'.format(key))
 

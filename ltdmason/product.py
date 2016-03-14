@@ -59,8 +59,8 @@ class Product(object):
         git_clone.clone(self.manifest.doc_repo_url, self.doc_dir,
                         _out=clone_out_log,
                         _err=clone_err_log)
-        log.info(clone_out_log.getvalue())
-        log.info(clone_err_log.getvalue())
+        log.debug(clone_out_log.getvalue())
+        log.debug(clone_err_log.getvalue())
 
         # Checkout the appropriate ref
         checkout_out_log = BytesIO()
@@ -69,8 +69,8 @@ class Product(object):
         git.checkout(self.manifest.doc_repo_ref,
                      _out=checkout_out_log,
                      _err=checkout_err_log)
-        log.info(checkout_out_log.getvalue())
-        log.info(checkout_err_log.getvalue())
+        log.debug(checkout_out_log.getvalue())
+        log.debug(checkout_err_log.getvalue())
 
     def link_package_repos(self):
         """Link the doc/ directories of packages into the ``lsstsw``
@@ -105,7 +105,7 @@ class Product(object):
                     .format(package_name))
             else:
                 target = os.path.join(self.doc_dir, '_static', package_name)
-                log.info(
+                log.debug(
                     'Linking {0} to {1}'.format(source_static_dir, target))
                 os.symlink(source_static_dir, target)
 
@@ -133,8 +133,8 @@ class Product(object):
             pip.install('-r', 'requirements.txt',
                         _out=pip_out_log,
                         _err=pip_err_log)
-            log.info(pip_out_log.getvalue())
-            log.info(pip_err_log.getvalue())
+            log.debug(pip_out_log.getvalue())
+            log.debug(pip_err_log.getvalue())
 
     def build_sphinx(self):
         """Run the Sphinx build process to produce HTML documentation.
@@ -149,5 +149,5 @@ class Product(object):
                 a=True,  # build all, without caching
                 _out=build_out_log,
                 _err=build_err_log)
-        log.info(build_out_log.getvalue())
-        log.info(build_err_log.getvalue())
+        log.debug(build_out_log.getvalue())
+        log.debug(build_err_log.getvalue())

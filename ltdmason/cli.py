@@ -167,15 +167,15 @@ def read_aws_credentials():
     if c['aws_access_key_id'] is not None \
             and c['aws_secret_access_key'] is not None:
         del c['aws_profile']
-        log.info('Using $LTD_MASON_AWS_ID and $LTD_MASON_AWS_SECRET')
+        log.debug('Using $LTD_MASON_AWS_ID and $LTD_MASON_AWS_SECRET')
     else:
         del c['aws_access_key_id']
         del c['aws_secret_access_key']
         if c['aws_profile'] is None:
-            log.info('Assuming default AWS credential setup')
+            log.debug('Assuming default AWS credential setup')
             del c['aws_profile']
         else:
-            log.info('Using $LTD_MASON_AWS_PROFILE')
+            log.debug('Using $LTD_MASON_AWS_PROFILE')
 
     return c
 

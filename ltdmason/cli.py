@@ -32,8 +32,13 @@ def run_ltd_mason():
     responsible for running the full documentation build and upload
     process.
     """
-    logging.basicConfig(level=logging.INFO)
     args, unknown_args = parse_args()
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
     if args.manifest_path is None:
         # Read manifest from stdin
         manifest_data = sys.stdin.read()
@@ -144,6 +149,12 @@ def parse_args():
              'temporary directory is created an deleted. This manually-set '
              'directory is not deleted to aid debugging. Beware that any '
              'existing content in that directory will be deleted.')
+    parser.add_argument(
+        '--verbose',
+        dest='verbose',
+        default=False,
+        action='store_true',
+        help='Full logging of debug messages')
     args, unknown_args = parser.parse_known_args()
     return args, unknown_args
 

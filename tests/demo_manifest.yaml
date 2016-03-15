@@ -1,0 +1,12 @@
+product_name: 'lsst_apps'
+build_id: 'b1'
+refs: ['master']
+requester_github_handle: 'jonathansick'
+doc_repo:
+  url: 'https://github.com/lsst-sqre/pipelines_docs.git'
+  ref: 'master'
+packages:
+  afw:
+    dir: '/mnt/stack_docs/lsstsw/stack/Linux64/afw/2015_10.0-14-g7c5ed66'
+    url: 'https://github.com/lsst/afw.git'
+    ref: 'master'

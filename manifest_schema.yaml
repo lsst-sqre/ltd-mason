@@ -1,0 +1,60 @@
+# This is a schema for YAML-formatted Manifest files used by LTD Mason.
+#
+# Formally, we use Draft 4 of JSON Schema, though encoded as YAML.
+# See http://json-schema.org for schema spec, and
+# http://spacetelescope.github.io/understanding-json-schema/ for a useful
+# guide to JSON schemas.
+#
+# ltdmason.Manifest uses this schema to validate input Manifest files. A
+# developer can run this validation manually as well:
+#
+#     import yaml
+#     from ltdmason.manifest import Manifest
+#     manifest_data = yaml.safeload(...)
+#     Manifest.validate(manifest_data)
+
+$schema: "http://json-schema.org/draft-04/schema#"
+$id: "https://github.com/lsst-sqre/ltd-mason/manifest_schema.yaml"
+type: "object"
+required:
+  - "product_name"
+  - "build_id"
+  - "refs"
+  - "requester_github_handle"
+  - "doc_repo"
+  - "packages"
+properties:
+  product_name:
+    type: "string"
+  build_id:
+    type: "string"
+  refs:
+    type: "array"
+    items:
+      type: "string"
+  requester_github_handle:
+    type: "string"
+  doc_repo:
+    type: "object"
+    required:
+      - "url"
+      - "ref"
+    properties:
+      url:
+        type: "string"
+      ref:
+        type: "string"
+  packages:
+    additionalProperties:
+      type: "object"
+      required:
+        - "dir"
+        - "url"
+        - "ref"
+      properties:
+        dir:
+          type: "string"
+        url:
+          type: "string"
+        ref:
+          type: "string"

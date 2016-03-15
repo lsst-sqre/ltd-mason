@@ -78,12 +78,12 @@ def test_register_build_failed(demo_manifest):
 
 @responses.activate
 def test_confirm_upload_ok():
-    url = 'http://localhost:5000/builds/1/uploaded'
+    url = 'http://localhost:5000/builds/1'
 
     responses.add(
-        responses.POST,
+        responses.PATCH,
         url,
-        json={'hello': 'world'},  # FIXME get around empty body bug
+        json={'uploaded': True},
         status=200)
 
     _confirm_upload('http://localhost:5000/builds/1', 'token')
@@ -96,12 +96,12 @@ def test_confirm_upload_failed():
     """Check that an exception is raised when keeper does not return 200
     on an upload confirmation reques.
     """
-    url = 'http://localhost:5000/builds/1/uploaded'
+    url = 'http://localhost:5000/builds/1'
 
     responses.add(
-        responses.POST,
+        responses.PATCH,
         url,
-        json={'hello': 'world'},  # FIXME get around empty body bug
+        json={'uploaded': True},
         status=404)
 
     with pytest.raises(KeeperError):

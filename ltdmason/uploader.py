@@ -115,10 +115,9 @@ def _confirm_upload(build_url, keeper_token):
     KeeperError
        Any anomaly with LTD Keeper interaction.
     """
-    r = requests.post(
-        build_url + '/uploaded',
-        auth=(keeper_token, ''),
-        json={})
+    r = requests.patch(build_url,
+                       auth=(keeper_token, ''),
+                       json={'uploaded': True})
     if r.status_code != 200:
         raise KeeperError(r)
     log.debug(r.json())

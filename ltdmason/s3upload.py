@@ -7,6 +7,7 @@ install_aliases()
 
 import os
 import logging
+import mimetypes
 
 import boto3
 
@@ -124,6 +125,9 @@ def _upload_file(local_path, bucket_path, bucket,
                  metadata=None, acl=None, cache_control=None):
     """Upload a file to the S3 bucket.
 
+    This function uses the mimetypes module to guess and then set the
+    Content-Type and Encoding-Type headers.
+
     Parameters
     ----------
     local_path : str
@@ -150,6 +154,15 @@ def _upload_file(local_path, bucket_path, bucket,
         extra_args['Metadata'] = metadata
     if cache_control is not None:
         extra_args['CacheControl'] = cache_control
+
+    # guess_type returns None if it cannot detect a type
+    content_type, content_encoding = mimetypes.guess_type(local_path,
+                                                          strict=False)
+    if content_type is not None:
+        extra_args['ContentType'] = content_type
+    if content_encoding is not None:
+        extra_args['EncodingType'] = content_encoding
+
     log.debug(str(extra_args))
 
     obj = bucket.Object(bucket_path)

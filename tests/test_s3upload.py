@@ -30,9 +30,11 @@ import shutil
 import tempfile
 import uuid
 import logging
+import mimetypes
 
 import pytest
 import boto3
+import requests
 from ltdmason import s3upload
 
 log = logging.getLogger(__name__)
@@ -92,6 +94,7 @@ def test_s3upload(request):
                     **aws_credentials)
 
     _test_objects_exist(session, bucket_name, temp_bucket_dir, paths)
+    _test_content_types(session, bucket_name, temp_bucket_dir)
 
     expected_headers = {
         'x-amz-meta-surrogate-key': surrogate_key,
@@ -166,7 +169,6 @@ def _test_headers(session, bucket_name, bucket_root, expected_headers):
     bucket_location = s3.meta.client.get_bucket_location(Bucket=bucket_name)
 
     for obj in bucket.objects.filter(Prefix=bucket_root):
-        guess, _ = mimetypes.guess_type(obj.key)
         object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
             bucket_location['LocationConstraint'],
             bucket_name,
@@ -174,6 +176,27 @@ def _test_headers(session, bucket_name, bucket_root, expected_headers):
         r = requests.head(object_url)
         for key, expected_value in expected_headers.items():
             assert r.headers[key] == expected_value
+
+
+def _test_content_types(session, bucket_name, bucket_root):
+    """Verify that the expected Content-Type header was set."""
+    s3 = session.resource('s3')
+    bucket = s3.Bucket(bucket_name)
+
+    # AWS api doesn't give Content-Type header, so we'll test it directly
+    # via HTTP
+    # see http://stackoverflow.com/a/34698521 for making object URLs
+    bucket_location = s3.meta.client.get_bucket_location(Bucket=bucket_name)
+
+    for obj in bucket.objects.filter(Prefix=bucket_root):
+        guess, _ = mimetypes.guess_type(obj.key)
+        object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
+            bucket_location['LocationConstraint'],
+            bucket_name,
+            obj.key)
+        if guess is not None:
+            r = requests.head(object_url)
+            assert r.headers['content-type'] == guess
 
 
 def _clean_bucket(session, bucket_name, root_path):

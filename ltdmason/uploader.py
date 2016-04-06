@@ -73,12 +73,15 @@ def upload_via_keeper(manifest, product,
     upload(build_resource['bucket_name'],
            build_resource['bucket_root_dir'],
            product.html_dir,
+           surrogate_key=build_resource['surrogate_key'],
+           acl='public-read',
+           cache_control_max_age=31536000,
            **aws_credentials)
     log.debug('Upload complete: {0}:{1}'.format(
         build_resource['bucket_name'], build_resource['bucket_root_dir']))
 
     # Confirm upload to ltd-keeper
-    _confirm_upload(build_resource['build_url'], keeper_token)
+    _confirm_upload(build_resource['self_url'], keeper_token)
 
 
 def _register_build(manifest, keeper_url, keeper_token):

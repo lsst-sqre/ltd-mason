@@ -8,7 +8,7 @@ python:
 install:
 - pip install -r requirements.txt
 - pip install -e .
-script: py.test
+script: py.test --flake8 --cov=ltdmason
 env:
   # See README for information on variables needed for testing
   # - LTD_MASON_TEST_AWS_ID

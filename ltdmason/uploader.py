@@ -95,13 +95,18 @@ def _register_build(manifest, keeper_url, keeper_token):
     KeeperError
        Any anomaly with LTD Keeper interaction.
     """
+    data = {'git_refs': manifest.refs}
+    if manifest.build_id is not None:
+        data['slug'] = manifest.build_id
+    if manifest.requester_github_handle is not None:
+        data['github_requester'] = manifest.requester_github_handle
+
     r = requests.post(
         keeper_url + '/products/{p}/builds/'.format(
             p=manifest.product_name),
         auth=(keeper_token, ''),
-        json={'slug': manifest.build_id,
-              'git_refs': manifest.refs,
-              'github_requester': manifest.requester_github_handle})
+        json=data)
+
     if r.status_code != 201:
         raise KeeperError(r.json())
     build_info = r.json()

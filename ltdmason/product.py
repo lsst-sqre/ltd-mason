@@ -29,7 +29,7 @@ class BaseProduct(object):
         return
 
     @abc.abstractproperty
-    def doc_dir(self, arg1):
+    def doc_dir(self):
         """Directory path of the cloned documentation repository."""
         pass
 
@@ -170,3 +170,25 @@ class Product(BaseProduct):
                 _err=build_err_log)
         log.debug(build_out_log.getvalue())
         log.debug(build_err_log.getvalue())
+
+
+class TravisProduct(BaseProduct):
+    """Representation of a documentation product in the Travis environment.
+
+    This product assuemes the doc project has been cloned and build natively
+    by Travis; this product merely reports the build directory to the
+    uploader.
+    """
+    def __init__(self, doc_dir):
+        super(TravisProduct, self).__init__()
+        self._doc_dir = doc_dir
+
+    @property
+    def html_dir(self):
+        """Directory path of the built HTML product."""
+        return os.path.join(self.doc_dir, '_build/html')
+
+    @property
+    def doc_dir(self):
+        """Directory path of the cloned documentation repository."""
+        return self._doc_dir

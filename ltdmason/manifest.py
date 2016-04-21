@@ -12,7 +12,7 @@ from future.standard_library import install_aliases
 install_aliases()  # NOQA
 
 import abc
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 import os
 
 import jsonschema
@@ -191,3 +191,71 @@ def load_manifest_schema():
     assert pkg_resources.resource_exists(*resource_args)
     yaml_data = pkg_resources.resource_string(*resource_args)
     return ruamel.yaml.load(yaml_data)
+
+
+class TravisManifest(BaseManifest):
+    """Manifest for Travis CI based single doc repo builds.
+
+    Unlike the original :class:`Manifest` that was driven by YAML, the
+    :class:`TravisManifest` is driven by environment variables available in
+    a Travis CI environment.
+    """
+    def __init__(self):
+        super(TravisManifest, self).__init__()
+
+    @property
+    def doc_repo_url(self):
+        """Git URL for the product's Git documentation repository derived
+        from ``$TRAVIS_REPO_SLUG`` and assumes the repo is hosted on GitHub.
+        """
+        slug = os.getenv('TRAVIS_REPO_SLUG')
+        if slug is None:
+            raise RuntimeError('Environment variable TRAVIS_REPO_SLUG not set')
+        parts = ('https', 'github.com', slug + '.git', '', '', '')
+        url = urlunparse(parts)
+        return url
+
+    @property
+    def doc_repo_ref(self):
+        """Git ref (branch name) for the product's Git documentation
+        repository (:class:`str`) derived from ``$TRAVIS_BRANCH``.
+        """
+        branch = os.getenv('TRAVIS_BRANCH')
+        if branch is None:
+            raise RuntimeError('Environment variable TRAVIS_BRANCH not set')
+        return branch
+
+    @property
+    def product_name(self):
+        """Name of the documentation product for LTD Keeper derived from
+        LTD_MASON_PRODUCT environment variable.
+        """
+        name = os.getenv('LTD_MASON_PRODUCT')
+        if name is None:
+            message = 'Environment variable LTD_MASON_PRODUCT not set'
+            raise RuntimeError(message)
+        return name
+
+    @property
+    def build_id(self):
+        """Build ID is set to `None` to allow LTD Keeper to set an ID."""
+        return None
+
+    @property
+    def requester_github_handle(self):
+        """The GitHub user triggering a build: this is not available on Travis.
+        Set to `None`.
+        """
+        return None
+
+    @property
+    def refs(self):
+        """`list` of Git refs that define the overal version set of the
+        products. On travis this is a one-item list with the branch name.
+        """
+        return [self.doc_repo_ref]
+
+    @property
+    def packages(self):
+        """Not applicable for Travis builds. Set to an empty list."""
+        return dict()

@@ -11,6 +11,7 @@ from builtins import *  # NOQA
 from future.standard_library import install_aliases
 install_aliases()  # NOQA
 
+import abc
 from urllib.parse import urlparse
 import os
 
@@ -19,7 +20,83 @@ import ruamel.yaml
 import pkg_resources
 
 
-class Manifest(object):
+class BaseManifest(object):
+    """Abstract base class defining the API for a Manifest.
+
+    Manifests specify the input parameters for a documentation build.
+    """
+
+    __metaclass__ = abc.ABCMeta
+
+    @property
+    def yaml(self):
+        """YAML representation of the manifest (:class:`str`)."""
+        return ruamel.yaml.dump(self.data, Dumper=ruamel.yaml.RoundTripDumper)
+
+    @abc.abstractproperty
+    def doc_repo_url(self):
+        """Git URL for the product's Git documentation repository."""
+        return
+
+    @abc.abstractproperty
+    def doc_repo_ref(self):
+        """Git ref (branch, commit, tag) for the product's Git documentation
+        repository (:class:`str`).
+        """
+        return
+
+    @property
+    def doc_repo_name(self):
+        """Name of the product's Git documentation repository (:class:`str`).
+
+        For example, a doc repository at
+        ``'https://github.com/lsst-sqre/pipelines_doc.git'`` is named
+        ``'pipelines_doc'``.
+        """
+        parts = urlparse(self.doc_repo_url)
+        return os.path.splitext(parts.path)[0].split('/')[-1]
+
+    @abc.abstractproperty
+    def product_name(self):
+        """Name of the documentation product for LTD Keeper."""
+        return
+
+    @abc.abstractproperty
+    def build_id(self):
+        """Build identifier (`str`)."""
+        return
+
+    @abc.abstractproperty
+    def requester_github_handle(self):
+        """GitHub username handle of person who triggered the build. `None`
+        if not available.
+        """
+        return
+
+    @abc.abstractproperty
+    def refs(self):
+        """`list` of Git refs that define the overal version set of the
+        products.
+        """
+        return
+
+    @abc.abstractproperty
+    def packages(self):
+        """Dictionary of package names as keys and package data as values.
+
+        Package data is a dict with keys:
+
+        - ``'dir'``: directory where the package was installed by lsstsw. This
+          is ensured to be an absolute URL, transforming any relative paths
+          in the Manifest, assuming they are relative to the **current
+          working directory.**
+        - ``'url'``: Git repository URL.
+        - ``'ref'``: Git reference for package (branch, commit, tag).
+        """
+        return
+
+
+class Manifest(BaseManifest):
     """Representation of a YAML-encoded manifest for an LSST stack product.
 
     Parameters
@@ -54,17 +131,6 @@ class Manifest(object):
         repository (:class:`str`).
         """
         return self.data['doc_repo']['ref']
-
-    @property
-    def doc_repo_name(self):
-        """Name of the product's Git documentation repository (:class:`str`).
-
-        For example, a doc repository at
-        ``'https://github.com/lsst-sqre/pipelines_doc.git'`` is named
-        ``'pipelines_doc'``.
-        """
-        parts = urlparse(self.doc_repo_url)
-        return os.path.splitext(parts.path)[0].split('/')[-1]
 
     @property
     def product_name(self):

@@ -28,11 +28,6 @@ class BaseManifest(object):
 
     __metaclass__ = abc.ABCMeta
 
-    @property
-    def yaml(self):
-        """YAML representation of the manifest (:class:`str`)."""
-        return ruamel.yaml.dump(self.data, Dumper=ruamel.yaml.RoundTripDumper)
-
     @abc.abstractproperty
     def doc_repo_url(self):
         """Git URL for the product's Git documentation repository."""

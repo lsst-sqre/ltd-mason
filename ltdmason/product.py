@@ -10,6 +10,7 @@ install_aliases()  # NOQA
 import os
 import logging
 from io import BytesIO
+import abc
 
 import sh
 
@@ -17,10 +18,27 @@ log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
 
-class Product(object):
+class BaseProduct(object):
+    """Abstract base class specifying the minimum API for products classes."""
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractproperty
+    def html_dir(self):
+        """Directory path of the built HTML product."""
+        return
+
+    @abc.abstractproperty
+    def doc_dir(self, arg1):
+        """Directory path of the cloned documentation repository."""
+        pass
+
+
+class Product(BaseProduct):
     """Representation of a documentation product, with logic and state
     for building a documentation project given a
-    :class:`ltdmason.manifest.Manifest`.
+    :class:`ltdmason.manifest.Manifest`. This is intended for Eups-based
+    documentation builds from a Jenkins environment.
 
     Parameters
     ----------
@@ -46,6 +64,7 @@ class Product(object):
 
     @property
     def html_dir(self):
+        """Directory path of the built HTML product."""
         return os.path.join(self.doc_dir, '_build', 'html')
 
     def clone_doc_repo(self):

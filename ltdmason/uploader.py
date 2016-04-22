@@ -5,15 +5,72 @@ from builtins import *  # NOQA
 from future.standard_library import install_aliases
 install_aliases()  # NOQA
 
+import os
 import logging
 
 import requests
 
-from .s3upload import upload
+# weird import helps with mocking
+from .s3upload import upload as s3upload_upload
 
 
 log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
+
+
+def upload(manifest, product):
+    aws_credentials = read_aws_credentials()
+    keeper_credentials = read_keeper_credentials()
+    keeper_token = get_keeper_token(
+        keeper_credentials['keeper_url'],
+        keeper_credentials['keeper_username'],
+        keeper_credentials['keeper_password'])
+    upload_via_keeper(manifest, product,
+                      keeper_url=keeper_credentials['keeper_url'],
+                      keeper_token=keeper_token,
+                      aws_credentials=aws_credentials)
+
+
+def read_aws_credentials():
+    keys = (('aws_profile', 'LTD_MASON_AWS_PROFILE'),
+            ('aws_access_key_id', 'LTD_MASON_AWS_ID'),
+            ('aws_secret_access_key', 'LTD_MASON_AWS_SECRET'))
+    c = {k: os.getenv(envvar) for (k, envvar) in keys}
+    if c['aws_access_key_id'] is not None \
+            and c['aws_secret_access_key'] is not None:
+        del c['aws_profile']
+        log.debug('Using $LTD_MASON_AWS_ID and $LTD_MASON_AWS_SECRET')
+    else:
+        del c['aws_access_key_id']
+        del c['aws_secret_access_key']
+        if c['aws_profile'] is None:
+            log.debug('Assuming default AWS credential setup')
+            del c['aws_profile']
+        else:
+            log.debug('Using $LTD_MASON_AWS_PROFILE')
+
+    return c
+
+
+def read_keeper_credentials():
+    keys = (('keeper_url', 'LTD_KEEPER_URL'),
+            ('keeper_username', 'LTD_KEEPER_USER'),
+            ('keeper_password', 'LTD_KEEPER_PASSWORD'))
+    c = {k: os.getenv(envvar) for (k, envvar) in keys}
+    for (k, envvar) in keys:
+        if c[k] is None:
+            raise RuntimeError('Please set {0}'.format(envvar))
+    return c
+
+
+def get_keeper_token(base_url, username, password):
+    """Get a temporary auth token from ltd-keeper."""
+    token_endpoint = base_url + '/token'
+    r = requests.get(token_endpoint, auth=(username, password))
+    if r.status_code != 200:
+        raise RuntimeError('Could not authenticate to {0}: error {1:d}\n{2}'.
+                           format(base_url, r.status_code, r.json()))
+    return r.json()['token']
 
 
 def upload_via_keeper(manifest, product,
@@ -70,13 +127,13 @@ def upload_via_keeper(manifest, product,
     if aws_credentials is None:
         # Fall back to using default AWS credentials the user might have set
         aws_credentials = {}
-    upload(build_resource['bucket_name'],
-           build_resource['bucket_root_dir'],
-           product.html_dir,
-           surrogate_key=build_resource['surrogate_key'],
-           acl='public-read',
-           cache_control_max_age=31536000,
-           **aws_credentials)
+    s3upload_upload(build_resource['bucket_name'],
+                    build_resource['bucket_root_dir'],
+                    product.html_dir,
+                    surrogate_key=build_resource['surrogate_key'],
+                    acl='public-read',
+                    cache_control_max_age=31536000,
+                    **aws_credentials)
     log.debug('Upload complete: {0}:{1}'.format(
         build_resource['bucket_name'], build_resource['bucket_root_dir']))
 

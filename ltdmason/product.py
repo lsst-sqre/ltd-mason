@@ -179,16 +179,17 @@ class TravisProduct(BaseProduct):
     by Travis; this product merely reports the build directory to the
     uploader.
     """
-    def __init__(self, doc_dir):
+    def __init__(self, html_dir):
         super(TravisProduct, self).__init__()
-        self._doc_dir = doc_dir
+        self._html_dir = html_dir
 
     @property
     def html_dir(self):
         """Directory path of the built HTML product."""
-        return os.path.join(self.doc_dir, '_build/html')
+        return self._html_dir
 
     @property
     def doc_dir(self):
-        """Directory path of the cloned documentation repository."""
-        return self._doc_dir
+        # LTD Mason on Travis doesn't need to know about the Sphinx repo
+        # since it isn't building sphinx.
+        raise NotImplementedError

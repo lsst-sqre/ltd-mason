@@ -52,7 +52,7 @@ def run():
         sys.exit(0)
 
     manifest = TravisManifest()
-    product = TravisProduct(os.path.join(os.getcwd(), args.doc_dir))
+    product = TravisProduct(os.path.abspath(os.path.expandvars(args.html_dir)))
 
     if not args.no_upload:
         upload(manifest, product)
@@ -68,12 +68,10 @@ def parse_args():
             Build Sphinx product documentation for LSST the Docs.
 
             ltd-mason-travis is intended to be run from a Travis CI
-            environment. Travis should have build the Sphinx document and
-            the current working directory on Travis should be consistent with
-            the --dir flag.
+            environment. Travis should build the Sphinx document. Tell Mason
+            where the built HTML is located with the --html-dir argument.
 
-            ltd-mason's use of Amazon S3 and LTD Keeper are configured with
-            environment variables:
+            ltd-mason-travis uses environment variables for configuration:
 
             LTD_MASON_BUILD
                Set to `true` to declare a build should be run with Mason.
@@ -119,16 +117,16 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='See https://github.com/lsst-sqre/ltd-mason for more info.')
     parser.add_argument(
-        '--dir',
-        dest='doc_dir',
+        '--html-dir',
+        dest='html_dir',
         default='',
-        help='Directory of the Sphinx docs relative to the Git repo')
+        help='Directory of the built HTML site')
     parser.add_argument(
         '--no-upload',
         dest='no_upload',
         default=False,
         action='store_true',
-        help='Skip the upload to S3 and ltd-keeper; only build the docs')
+        help='Skip the upload to S3 and ltd-keeper')
     parser.add_argument(
         '--verbose',
         dest='verbose',

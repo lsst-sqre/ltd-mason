@@ -22,3 +22,10 @@ For more information about LSST the Docs, see `SQR-006: Documentation Deployment
    :name: part-dev
 
    dev-workflow
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Project Information
+   :name: part-info
+
+   license

@@ -15,3 +15,10 @@ For more information about LSST the Docs, see `SQR-006: Documentation Deployment
 
    travis
    jenkins
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Developer Guide
+   :name: part-dev
+
+   dev-workflow

@@ -29,3 +29,4 @@ For more information about LSST the Docs, see `SQR-006: Documentation Deployment
    :name: part-info
 
    license
+   changelog

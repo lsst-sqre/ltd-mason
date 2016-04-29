@@ -182,9 +182,9 @@ def _confirm_upload(build_url, keeper_token):
     r = requests.patch(build_url,
                        auth=(keeper_token, ''),
                        json={'uploaded': True})
+    log.debug(r.json())
     if r.status_code != 200:
         raise KeeperError(r)
-    log.debug(r.json())
 
 
 class KeeperError(Exception):

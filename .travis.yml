@@ -17,9 +17,9 @@ install:
   - pip install -e .
 script:
   - py.test --flake8 --cov=ltdmason
+  - sphinx-build -b html -a -n -W -d docs/_build/doctree docs docs/_build/html
 after_success:
   # ltd-mason is a no-op for regular builds with LTD_MASON_BUILD=false
-  - sphinx-build -b html -a -n -W docs docs/_build/html
   - ltd-mason-travis --html-dir docs/_build/html
 env:
   global:

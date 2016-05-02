@@ -90,7 +90,7 @@ The sample :file:`travis.yml` file below shows how Travis can be configured to b
      - pip install -r requirements.txt
      - pip install ltd-mason
    script:
-     - sphinx-build -b html -a -n -W . _build/html
+     - sphinx-build -b html -a -n -W -d _build/doctree . _build/html
    after_success:
      - ltd-mason-travis --html-dir _build/html
    env:
@@ -150,7 +150,7 @@ The following :file:`travis.yml` sample shows how this can be achieved.
      - pip install -e .
    script:
      - py.test --flake8 --cov=ltdmason
-     - sphinx-build -b html -a -n -W docs docs/_build/html
+     - sphinx-build -b html -a -n -W -d docs/_build/doctree docs docs/_build/html
    after_success:
      - ltd-mason-travis --html-dir docs/_build/html
    env:

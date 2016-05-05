@@ -4,14 +4,14 @@ from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
 from builtins import *  # NOQA
 from future.standard_library import install_aliases
-install_aliases()
+install_aliases()  # NOQA
 
 import pkg_resources
 import pytest
 from jsonschema import ValidationError
 import ruamel.yaml
 
-from ltdmason.manifest import Manifest
+from ltdmason.manifest import Manifest, TravisManifest
 
 
 @pytest.fixture
@@ -86,3 +86,36 @@ def test_bad_refs_type(demo_manifest):
     manifest['refs'] = 'master'
     with pytest.raises(ValidationError):
         Manifest.validate(manifest)
+
+
+def test_travis_manifest(monkeypatch):
+    monkeypatch.setenv('TRAVIS_BRANCH', 'master')
+    monkeypatch.setenv('TRAVIS_REPO_SLUG', 'lsst-sqre/ltd-keeper')
+    monkeypatch.setenv('LTD_MASON_PRODUCT', 'ltd-keeper')
+
+    manifest = TravisManifest()
+    assert manifest.doc_repo_url \
+        == 'https://github.com/lsst-sqre/ltd-keeper.git'
+    assert manifest.doc_repo_ref == 'master'
+    assert manifest.product_name == 'ltd-keeper'
+    assert manifest.build_id is None
+    assert manifest.requester_github_handle is None
+    assert manifest.refs == ['master']
+    assert len(manifest.packages) == 0
+
+
+def test_travis_manifest_missing_envvars(monkeypatch):
+    monkeypatch.delenv('TRAVIS_BRANCH', raising=False)
+    monkeypatch.delenv('TRAVIS_REPO_SLUG', raising=False)
+    monkeypatch.delenv('LTD_MASON_PRODUCT', raising=False)
+
+    manifest = TravisManifest()
+
+    with pytest.raises(RuntimeError):
+        manifest.doc_repo_url
+    with pytest.raises(RuntimeError):
+        manifest.doc_repo_ref
+    with pytest.raises(RuntimeError):
+        manifest.product_name
+    with pytest.raises(RuntimeError):
+        manifest.refs

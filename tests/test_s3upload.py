@@ -23,16 +23,18 @@ from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
 from builtins import *  # NOQA
 from future.standard_library import install_aliases
-install_aliases()
+install_aliases()  # NOQA
 
 import os
 import shutil
 import tempfile
 import uuid
 import logging
+import mimetypes
 
 import pytest
 import boto3
+import requests
 from ltdmason import s3upload
 
 log = logging.getLogger(__name__)
@@ -82,11 +84,22 @@ def test_s3upload(request):
 
     _create_test_files(temp_dir, paths)
 
+    surrogate_key = 'test-surrogate-key'
+    cache_control_max_age = 3600
     s3upload.upload(bucket_name,
                     temp_bucket_dir,
                     temp_dir,
+                    surrogate_key=surrogate_key,
+                    cache_control_max_age=cache_control_max_age,
                     **aws_credentials)
+
     _test_objects_exist(session, bucket_name, temp_bucket_dir, paths)
+    _test_content_types(session, bucket_name, temp_bucket_dir)
+
+    expected_headers = {
+        'x-amz-meta-surrogate-key': surrogate_key,
+        'Cache-Control': 'max-age={0:d}'.format(cache_control_max_age)}
+    _test_headers(session, bucket_name, temp_bucket_dir, expected_headers)
 
     # Remove some files (on filesystem and in path manifest)
     shutil.rmtree(os.path.join(temp_dir, 'dir1'))
@@ -143,6 +156,47 @@ def _test_objects_exist(session, bucket_name, bucket_root, file_list):
         if not found:
             log.error('{0} not found in bucket'.format(bucket_path))
             assert False
+
+
+def _test_headers(session, bucket_name, bucket_root, expected_headers):
+    """Generically test that header key-value pairs in `expected_headers`
+    actually are served by S3.
+    """
+    s3 = session.resource('s3')
+    bucket = s3.Bucket(bucket_name)
+
+    # see http://stackoverflow.com/a/34698521 for making object URLs
+    bucket_location = s3.meta.client.get_bucket_location(Bucket=bucket_name)
+
+    for obj in bucket.objects.filter(Prefix=bucket_root):
+        object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
+            bucket_location['LocationConstraint'],
+            bucket_name,
+            obj.key)
+        r = requests.head(object_url)
+        for key, expected_value in expected_headers.items():
+            assert r.headers[key] == expected_value
+
+
+def _test_content_types(session, bucket_name, bucket_root):
+    """Verify that the expected Content-Type header was set."""
+    s3 = session.resource('s3')
+    bucket = s3.Bucket(bucket_name)
+
+    # AWS api doesn't give Content-Type header, so we'll test it directly
+    # via HTTP
+    # see http://stackoverflow.com/a/34698521 for making object URLs
+    bucket_location = s3.meta.client.get_bucket_location(Bucket=bucket_name)
+
+    for obj in bucket.objects.filter(Prefix=bucket_root):
+        guess, _ = mimetypes.guess_type(obj.key)
+        object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
+            bucket_location['LocationConstraint'],
+            bucket_name,
+            obj.key)
+        if guess is not None:
+            r = requests.head(object_url)
+            assert r.headers['content-type'] == guess
 
 
 def _clean_bucket(session, bucket_name, root_path):

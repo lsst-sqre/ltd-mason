@@ -103,7 +103,7 @@ Unit tests
 
 Developers can run unit tests via `pytest <http://pytest.org>`_::
 
-   py.test
+   py.test  --flake8 --cov=ltdmason
 
 To run a full suite of AWS S3 integration tests, you'll need AWS credentials and an S3 bucket to test in.
 Configure the tests to use these by setting the following environment variables:

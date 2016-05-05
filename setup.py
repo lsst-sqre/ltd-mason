@@ -9,7 +9,7 @@ author = 'Jonathan Sick'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/ltd-mason'
-version = '0.1.0'
+version = '0.2.0rc0'
 
 
 def read(filename):
@@ -46,6 +46,7 @@ setup(
     entry_points={
         'console_scripts': [
             'ltd-mason = ltdmason.cli:run_ltd_mason',
+            'ltd-mason-travis = ltdmason.traviscli:run',
         ]
     }
 )

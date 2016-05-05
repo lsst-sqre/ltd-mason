@@ -1,20 +1,36 @@
 sudo: false
 language: python
 python:
-- '2.7'
-- '3.4'
-- '3.5'
-- '3.5-dev'
+  - '2.7'
+  - '3.4'
+  - '3.5'
+  - '3.5-dev'
+matrix:
+  allow_failures:
+    - python: "3.5-dev"
+  include:
+    # This is the ltd-mason documentation deployment build
+    - python: "3.5"
+      env: LTD_MASON_BUILD=true
 install:
-- pip install -r requirements.txt
-- pip install -e .
-script: py.test
+  - pip install -r requirements.txt
+  - pip install -e .
+script:
+  - py.test --flake8 --cov=ltdmason
+  - sphinx-build -b html -a -n -W -d docs/_build/doctree docs docs/_build/html
+after_success:
+  # ltd-mason is a no-op for regular builds with LTD_MASON_BUILD=false
+  - ltd-mason-travis --html-dir docs/_build/html
 env:
-  # See README for information on variables needed for testing
-  # - LTD_MASON_TEST_AWS_ID
-  # - LTD_MASON_TEST_AWS_SECRET
-  # - LTD_MASON_TEST_BUCKET
   global:
-  - LTD_MASON_TEST_AWS_ID=AKIAJQTXPK2NYX2KHS7Q
-  # travis encrypt "LTD_MASON_TEST_AWS_SECRET=... LTD_MASON_TEST_BUCKET=..." --add env.global
-  - secure: IwwOxrEuGJ2J17WkYltWSq60WSyHOvH4ie0FccpvL7zZ3F8ca2rtLKpwW66Huv4TkkC1eYdw9B2v8hY8YtHsn9FkrnXYpTSd+2cyKO5S/y7D0BRKb5WfdvKa/a0NKDswlTKXvmca+8/Su3BhAAF+A8GOWRjHc04O4O3C+gWquch6+21cCIXcUEHDnDOLvnLDRZ3WQDVvQfKD7ZWOxYw/M8v/tas5qF/yvm+/8TGFkC+NHKGKll2SZDUd03iAYSIhekzqGx2peqGoBtk3TBThEYaW91PEae0N1bqgyPL4qhjkBxUtIFk5tRpFjJR3J3kSWTMx30TQk1VBvOHrN83DkHNZLG56K+ygv6F5yB+mkxYZNugeaSHEtWLVs7p4b38A0rofLwUP77RYHPE+TeKCKXqhF4WGv1w+CHVfYiXEeaI6AeHJz9ta66+9y3+d7uJBFim2haM8K48rj69ycIRmOw6xbtUn7GYMBHgF96lx9OSkq6vL0bh2l6O3NOFoqpgTDcZ6fENJQ+9YnRwaQk2WWx/KoeWMR0Q3QSoYzUTsrgSYgDIvEW3Vdmcfk9l1Er+GuQxJeyXjscZzRF3ix0aWJfqnS9KRD7mawvNjZfFU3pCcE6hcqZCZ1ZMJcomxl71bpMV6MYhLFiKiKvH6LrpwD+xHpz3qanAjjj3JvHUfqnQ=
+    - LTD_MASON_BUILD=false  # disable builds in regular text matrix
+    - LTD_MASON_PRODUCT="ltd-mason"
+    # travis encrypt "LTD_MASON_AWS_ID=... LTD_MASON_AWS_SECRET=... LTD_KEEPER_URL=... LTD_KEEPER_USER=... LTD_KEEPER_PASSWORD=..." --add env.global 
+    - secure: "CIpaoNzWwEQngjmj0/OQBRUOnkT9Rq8273N5ZgXmZTtVSliukfJMROQnp9m42x3a2XFamaYV60mmuAvMRNU8VHi4nePxF2vp7utVnp8cF4zFQQzL6KnN2rqWv0H3Snqc1sfMT2n4H9qgBlYG7w5Cv52VIXdwh8MqGSxl8HAiYgqcVNJ+q1Rxeb1Yk+Bv3VW6O0/K4AlrhGY2Gl/zbwgM4ph0K0UvT1IZg8ZjCdddOpgwxPq66kvzHNcpCR6JUnvy5vRVH+IgC83Ar+oJqOA/4pizcFccriLF7nANkVJMrRSL8B1h2IHuuGYpC2VzDPMlAuEPmU6t8QAhVCOq9BSy98902TgKkvt4enPcxS2iNqMoOJSNUW7q9yqvVacz4JApJfHWlq5K7uTy00p4XHV4TUs+9NEgBUCwEFE5CXcRQvg+Y2y1wqUUkH+12nb1Nv4CdGxG6k7yG+eM+qmANJ87jZK9vX0RmDLKXuA3gpJyVomrAKX1+MqqwD0Qu885AUsHCQevO+oDmXv6nKLK/x2ZeyHQrgWISj3LXU6B7LarLrqsrE7JWTwgo/iX6xiVHS422tj94/+rab3JarBWe+ntdG9rZBdILU92kLqzgMA570ryVxtsnu8GnzOB0/3yvdtW+duAgrrBUusBcg9E/Kz/68Cm5RbMLyjaeA6HxP6mfM4="
+    # See README for information on variables needed for testing
+    # - LTD_MASON_TEST_AWS_ID
+    # - LTD_MASON_TEST_AWS_SECRET
+    # - LTD_MASON_TEST_BUCKET
+    - LTD_MASON_TEST_AWS_ID=AKIAJQTXPK2NYX2KHS7Q
+    # travis encrypt "LTD_MASON_TEST_AWS_SECRET=... LTD_MASON_TEST_BUCKET=..." --add env.global
+    - secure: IwwOxrEuGJ2J17WkYltWSq60WSyHOvH4ie0FccpvL7zZ3F8ca2rtLKpwW66Huv4TkkC1eYdw9B2v8hY8YtHsn9FkrnXYpTSd+2cyKO5S/y7D0BRKb5WfdvKa/a0NKDswlTKXvmca+8/Su3BhAAF+A8GOWRjHc04O4O3C+gWquch6+21cCIXcUEHDnDOLvnLDRZ3WQDVvQfKD7ZWOxYw/M8v/tas5qF/yvm+/8TGFkC+NHKGKll2SZDUd03iAYSIhekzqGx2peqGoBtk3TBThEYaW91PEae0N1bqgyPL4qhjkBxUtIFk5tRpFjJR3J3kSWTMx30TQk1VBvOHrN83DkHNZLG56K+ygv6F5yB+mkxYZNugeaSHEtWLVs7p4b38A0rofLwUP77RYHPE+TeKCKXqhF4WGv1w+CHVfYiXEeaI6AeHJz9ta66+9y3+d7uJBFim2haM8K48rj69ycIRmOw6xbtUn7GYMBHgF96lx9OSkq6vL0bh2l6O3NOFoqpgTDcZ6fENJQ+9YnRwaQk2WWx/KoeWMR0Q3QSoYzUTsrgSYgDIvEW3Vdmcfk9l1Er+GuQxJeyXjscZzRF3ix0aWJfqnS9KRD7mawvNjZfFU3pCcE6hcqZCZ1ZMJcomxl71bpMV6MYhLFiKiKvH6LrpwD+xHpz3qanAjjj3JvHUfqnQ=

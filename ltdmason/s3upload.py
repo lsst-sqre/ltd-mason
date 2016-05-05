@@ -3,10 +3,11 @@ from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
 from builtins import *  # NOQA
 from future.standard_library import install_aliases
-install_aliases()
+install_aliases()  # NOQA
 
 import os
 import logging
+import mimetypes
 
 import boto3
 
@@ -15,6 +16,8 @@ log.addHandler(logging.NullHandler())
 
 
 def upload(bucket_name, path_prefix, source_dir,
+           surrogate_key=None, acl='public-read',
+           cache_control_max_age=31536000,
            aws_access_key_id=None, aws_secret_access_key=None,
            aws_profile=None):
     """Upload built documentation to S3.
@@ -40,6 +43,20 @@ def upload(bucket_name, path_prefix, source_dir,
         Path of the Sphinx HTML build directory on the local file system.
         The contents of this directory are uploaded into the ``/path_prefix/``
         directory of the S3 bucket.
+    surrogate_key : str, optional
+        The surrogate key to insert in the header of all objects
+        in the ``x-amz-meta-surrogate-key`` field. This key is used to purge
+        builds from the Fastly CDN when Editions change.
+        If `None` then no header will be set.
+    acl : str, optional
+        The pre-canned AWS access control list to apply to this upload.
+        Defaults to ``'public-read'``, which allow files to be downloaded
+        over HTTP by the public. See
+        https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
+        for an overview of S3's pre-canned ACL lists. Note that ACL settings
+        are not validated locally.
+    cache_control_max_age : int, optional
+        Defaults to 31536000 seconds = 1 year.
     aws_access_key_id : str, optional
         The access key for your AWS account. Also set `aws_secret_access_key`.
     aws_secret_access_key : str, optional
@@ -58,6 +75,17 @@ def upload(bucket_name, path_prefix, source_dir,
         aws_secret_access_key=aws_secret_access_key)
     s3 = session.resource('s3')
     bucket = s3.Bucket(bucket_name)
+
+    metadata = None
+    if surrogate_key is not None:
+        if metadata is None:
+            metadata = {}
+        metadata['surrogate-key'] = surrogate_key
+
+    if cache_control_max_age is not None:
+        cache_control = 'max-age={0:d}'.format(cache_control_max_age)
+    else:
+        cache_control = None
 
     manager = ObjectManager(session, bucket_name, path_prefix)
 
@@ -88,11 +116,17 @@ def upload(bucket_name, path_prefix, source_dir,
             local_path = os.path.join(rootdir, filename)
             bucket_path = os.path.join(path_prefix, bucket_root, filename)
             log.debug('Uploading to {0}'.format(bucket_path))
-            _upload_file(local_path, bucket_path, bucket)
+            _upload_file(local_path, bucket_path, bucket,
+                         metadata=metadata, acl=acl,
+                         cache_control=cache_control)
 
 
-def _upload_file(local_path, bucket_path, bucket):
+def _upload_file(local_path, bucket_path, bucket,
+                 metadata=None, acl=None, cache_control=None):
     """Upload a file to the S3 bucket.
+
+    This function uses the mimetypes module to guess and then set the
+    Content-Type and Encoding-Type headers.
 
     Parameters
     ----------
@@ -103,10 +137,37 @@ def _upload_file(local_path, bucket_path, bucket):
         S3 bucket.
     bucket : `boto3` Bucket instance
         S3 bucket.
+    metadata : dict, optional
+        Header metadata values. These keys will appear in headers as
+        ``x-amz-meta-*``.
+    acl : str, optional
+        A pre-canned access control list. See
+        https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
+    cache_control : str, optional
+        The cache-control header value. For example, 'max-age=31536000'.
+        ``'
     """
+    extra_args = {}
+    if acl is not None:
+        extra_args['ACL'] = acl
+    if metadata is not None:
+        extra_args['Metadata'] = metadata
+    if cache_control is not None:
+        extra_args['CacheControl'] = cache_control
+
+    # guess_type returns None if it cannot detect a type
+    content_type, content_encoding = mimetypes.guess_type(local_path,
+                                                          strict=False)
+    if content_type is not None:
+        extra_args['ContentType'] = content_type
+    if content_encoding is not None:
+        extra_args['EncodingType'] = content_encoding
+
+    log.debug(str(extra_args))
+
     obj = bucket.Object(bucket_path)
     # no return status from the upload_file api
-    obj.upload_file(local_path)
+    obj.upload_file(local_path, ExtraArgs=extra_args)
 
 
 class ObjectManager(object):

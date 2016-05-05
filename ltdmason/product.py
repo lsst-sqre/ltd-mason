@@ -5,11 +5,12 @@ from __future__ import (division, absolute_import, print_function,
                         unicode_literals)
 from builtins import *  # NOQA
 from future.standard_library import install_aliases
-install_aliases()
+install_aliases()  # NOQA
 
 import os
 import logging
 from io import BytesIO
+import abc
 
 import sh
 
@@ -17,10 +18,27 @@ log = logging.getLogger(__name__)
 log.addHandler(logging.NullHandler())
 
 
-class Product(object):
+class BaseProduct(object):
+    """Abstract base class specifying the minimum API for products classes."""
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractproperty
+    def html_dir(self):
+        """Directory path of the built HTML product."""
+        return
+
+    @abc.abstractproperty
+    def doc_dir(self):
+        """Directory path of the cloned documentation repository."""
+        pass
+
+
+class Product(BaseProduct):
     """Representation of a documentation product, with logic and state
     for building a documentation project given a
-    :class:`ltdmason.manifest.Manifest`.
+    :class:`ltdmason.manifest.Manifest`. This is intended for Eups-based
+    documentation builds from a Jenkins environment.
 
     Parameters
     ----------
@@ -46,6 +64,7 @@ class Product(object):
 
     @property
     def html_dir(self):
+        """Directory path of the built HTML product."""
         return os.path.join(self.doc_dir, '_build', 'html')
 
     def clone_doc_repo(self):
@@ -151,3 +170,26 @@ class Product(object):
                 _err=build_err_log)
         log.debug(build_out_log.getvalue())
         log.debug(build_err_log.getvalue())
+
+
+class TravisProduct(BaseProduct):
+    """Representation of a documentation product in the Travis environment.
+
+    This product assuemes the doc project has been cloned and build natively
+    by Travis; this product merely reports the build directory to the
+    uploader.
+    """
+    def __init__(self, html_dir):
+        super(TravisProduct, self).__init__()
+        self._html_dir = html_dir
+
+    @property
+    def html_dir(self):
+        """Directory path of the built HTML product."""
+        return self._html_dir
+
+    @property
+    def doc_dir(self):
+        # LTD Mason on Travis doesn't need to know about the Sphinx repo
+        # since it isn't building sphinx.
+        raise NotImplementedError

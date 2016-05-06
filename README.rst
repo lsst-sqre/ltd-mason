@@ -1,4 +1,4 @@
-.. image:: https://img.shields.io/pypi/lsst-sqre/ltd-mason.svg
+.. image:: https://img.shields.io/pypi/v/ltd-mason.svg
 .. image:: https://img.shields.io/travis/lsst-sqre/ltd-mason.svg
 
 ####################

@@ -9,7 +9,7 @@ author = 'Jonathan Sick'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/ltd-mason'
-version = '0.2.0rc0'
+version = '0.2.0'
 
 
 def read(filename):

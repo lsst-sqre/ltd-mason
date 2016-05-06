@@ -2,11 +2,19 @@
 LTD Mason
 #########
 
-LTD Mason is the Sphinx documentation build tool for LSST the Docs.
-Mason is capable of building complex multi-repository documentation projects; it can also build simple Sphinx projects from Travis CI.
-LTD Mason coordinates with `LTD Keeper <http://ltd-keeper.lsst.io>`_ and uploads documentation to Amazon S3.
+**Mason** is the build tool for LSST software documentation.
+It's flexible and can run as part of a :doc:`Travis CI build <travis>` to upload built documentation to Amazon S3 in coordination with `LTD Keeper <https://ltd-keeper.lsst.io>`_.
+Mason can also build documentation for complex multi-repository software projects like the LSST Science Pipelines.
 
-For more information about LSST the Docs, see `SQR-006: Documentation Deployment Service for LSST's Eups-based Software <http://sqr-006.lsst.io>`_.
+Mason is a part of the **LSST the Docs** (LTD) service for continuous documentation delivery.
+You can learn more about LTD in our `SQR-006 <https://sqr-006.lsst.io>`_ technote.
+
+Mason is developed on GitHub at https://github.com/lsst-sqre/ltd-mason.
+Releases are `available on PyPI <https://pypi.python.org/pypi/ltd-mason/>`_:
+
+.. code-block:: bash
+
+   pip install ltd-mason
 
 .. toctree::
    :maxdepth: 1

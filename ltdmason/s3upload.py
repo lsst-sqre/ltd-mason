@@ -160,8 +160,6 @@ def _upload_file(local_path, bucket_path, bucket,
                                                           strict=False)
     if content_type is not None:
         extra_args['ContentType'] = content_type
-    if content_encoding is not None:
-        extra_args['EncodingType'] = content_encoding
 
     log.debug(str(extra_args))
 

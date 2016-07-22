@@ -51,6 +51,7 @@ setup(
         'console_scripts': [
             'ltd-mason = ltdmason.cli:run_ltd_mason',
             'ltd-mason-travis = ltdmason.traviscli:run',
+            'ltd-mason-make-redirects = ltdmason.redirectdircli:run',
         ]
     }
 )

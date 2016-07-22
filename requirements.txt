@@ -1,15 +1,13 @@
-future==0.15.2
+--index-url https://pypi.python.org/simple/
+
+-e .
+
+# Development/testing dependencies
 pytest==2.8.7
 pytest-mock==0.11.0
 pytest-cov==2.2.1
 pytest-flake8==0.2
-requests==2.9.1
 responses==0.5.1
-ruamel.yaml==0.10.17
-sh==1.11
-boto3==1.2.3
-jsonschema==2.5.1
-Sphinx==1.3.5
-docutils==0.12
 twine==1.6.5
 wheel==0.29.0
+sphinx-rtd-theme==0.1.9

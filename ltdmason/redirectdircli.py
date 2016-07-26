@@ -45,10 +45,9 @@ def run():
             # Skip {product}/v or {product}/builds directories
             continue
         # create a directory redirect object
-        redirect_path = os.path.join(dirname, 'index.html')
-        redirect_metadata = {'ltd-redirect': redirect_path}
+        redirect_metadata = {'dir-redirect': 'true'}
         cache_control = 'max-age={0}'.format(31536000)
-        logging.info('Making {0} -> {1}'.format(dirname, redirect_path))
+        logging.info('Making redirect object at {0}'.format(dirname))
         _upload_object(dirname,
                        content='',
                        bucket=bucket,

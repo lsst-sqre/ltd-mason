@@ -46,8 +46,9 @@ def upload(bucket_name, path_prefix, source_dir,
         directory of the S3 bucket.
     upload_dir_redirect_objects : bool, optional
         A feature flag to enable uploading objects to S3 for every directory.
-        These objects contain headers that the Fastly VCL can use to redirect
-        a request to the index.html document of that directory.
+        These objects contain headers ``x-amz-meta-dir-redirect=true`` HTTP
+        headers that tell Fastly to issue a 301 redirect from the directory
+        object to the '/index.html' in that directory.
     surrogate_key : str, optional
         The surrogate key to insert in the header of all objects
         in the ``x-amz-meta-surrogate-key`` field. This key is used to purge
@@ -129,13 +130,11 @@ def upload(bucket_name, path_prefix, source_dir,
         if upload_dir_redirect_objects is True:
             bucket_dir_path = os.path.join(path_prefix, bucket_root)
             bucket_dir_path = bucket_dir_path.rstrip('/')
-            # get and validate path of index.html object in S3 bucket
-            bucket_index_path = os.path.join(bucket_dir_path, 'index.html')
             if metadata:
                 redirect_metadata = dict(metadata)
             else:
                 redirect_metadata = {}
-            redirect_metadata['ltd-redirect'] = bucket_index_path
+            redirect_metadata['dir-redirect'] = 'true'
             _upload_object(bucket_dir_path,
                            content='',
                            bucket=bucket,

@@ -231,7 +231,6 @@ def _test_directory_redirects(session, bucket_name, bucket_root, file_list):
     bucket_location = s3.meta.client.get_bucket_location(Bucket=bucket_name)
 
     for dirname in dirnames:
-        expected_index_path = os.path.join(dirname, 'index.html')
         # Try to request the object
         obj = s3.Object(bucket_name, dirname)
         object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
@@ -239,7 +238,7 @@ def _test_directory_redirects(session, bucket_name, bucket_root, file_list):
             bucket_name,
             obj.key)
         r = requests.head(object_url)
-        assert r.headers['x-amz-meta-ltd-redirect'] == expected_index_path
+        assert r.headers['x-amz-meta-dir-redirect'] == 'true'
 
 
 def _clean_bucket(session, bucket_name, root_path):

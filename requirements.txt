@@ -3,10 +3,10 @@
 -e .
 
 # Development/testing dependencies
-pytest==2.8.7
-pytest-mock==0.11.0
-pytest-cov==2.2.1
-pytest-flake8==0.2
+pytest==2.9.2
+pytest-cov==2.3.0
+pytest-flake8==0.6
+pytest-mock==1.1
 responses==0.5.1
 twine==1.6.5
 wheel==0.29.0

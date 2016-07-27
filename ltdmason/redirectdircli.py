@@ -48,12 +48,13 @@ def run():
         redirect_metadata = {'dir-redirect': 'true'}
         cache_control = 'max-age={0}'.format(31536000)
         logging.info('Making redirect object at {0}'.format(dirname))
-        _upload_object(dirname,
-                       content='',
-                       bucket=bucket,
-                       metadata=redirect_metadata,
-                       acl='public-read',
-                       cache_control=cache_control)
+        if not args.dry_run:
+            _upload_object(dirname,
+                           content='',
+                           bucket=bucket,
+                           metadata=redirect_metadata,
+                           acl='public-read',
+                           cache_control=cache_control)
 
 
 def parse_args():
@@ -88,4 +89,9 @@ subsequently.
         '--aws-secret',
         help='AWS secret access key',
         required=True)
+    parser.add_argument(
+        '--dry-run',
+        help='Dry-run, prevents objects from being uploaded',
+        action='store_true',
+        default=False)
     return parser.parse_args()

@@ -35,7 +35,7 @@ def run():
     bucket = s3.Bucket(args.bucket)
 
     directories = []
-    for obj in bucket.objects.filter(Prefix=''):
+    for obj in bucket.objects.filter(Prefix=args.base_dir):
         dirname = os.path.dirname(obj.key)
         if dirname:
             directories.append(dirname)
@@ -81,6 +81,10 @@ subsequently.
         '--bucket',
         help='LSST the Docs S3 bucket',
         required=True)
+    parser.add_argument(
+        '--base-dir',
+        help='Directory to make redirects in (defaults to all directories)',
+        default='')
     parser.add_argument(
         '--aws-id',
         help='AWS access key ID',

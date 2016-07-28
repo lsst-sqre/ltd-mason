@@ -16,7 +16,8 @@ install:
   - pip install -r requirements.txt
   - pip install -e .
 script:
-  - py.test --flake8 --cov=ltdmason
+  - py.test --cov=ltdmason
+  # - py.test --flake8 --cov=ltdmason  # pytest-flake8 is currently broken
   - sphinx-build -b html -a -n -W -d docs/_build/doctree docs docs/_build/html
 after_success:
   # ltd-mason is a no-op for regular builds with LTD_MASON_BUILD=false

@@ -9,7 +9,7 @@ author = 'Jonathan Sick'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/ltd-mason'
-version = '0.2.1'
+version = '0.2.2'
 
 
 def read(filename):
@@ -39,14 +39,19 @@ setup(
     ],
     keywords='lsst',
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
-    install_requires=['future', 'ruamel.yaml', 'sh', 'boto3', 'jsonschema',
-                      'sphinx', 'requests'],
-    tests_require=['pytest', 'responses'],
+    install_requires=['future>=0.15',
+                      'ruamel.yaml>=0.10',
+                      'sh>=1.11',
+                      'boto3>=1.2',
+                      'jsonschema>=2.5',
+                      'sphinx>=1.4',
+                      'requests>=2.9'],
     # package_data={},
     entry_points={
         'console_scripts': [
             'ltd-mason = ltdmason.cli:run_ltd_mason',
             'ltd-mason-travis = ltdmason.traviscli:run',
+            'ltd-mason-make-redirects = ltdmason.redirectdircli:run',
         ]
     }
 )

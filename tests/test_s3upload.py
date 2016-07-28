@@ -90,11 +90,13 @@ def test_s3upload(request):
                     temp_bucket_dir,
                     temp_dir,
                     surrogate_key=surrogate_key,
+                    upload_dir_redirect_objects=True,
                     cache_control_max_age=cache_control_max_age,
                     **aws_credentials)
 
     _test_objects_exist(session, bucket_name, temp_bucket_dir, paths)
     _test_content_types(session, bucket_name, temp_bucket_dir)
+    _test_directory_redirects(session, bucket_name, temp_bucket_dir, paths)
 
     expected_headers = {
         'x-amz-meta-surrogate-key': surrogate_key,
@@ -140,9 +142,12 @@ def _test_objects_exist(session, bucket_name, bucket_root, file_list):
     s3 = session.resource('s3')
     bucket = s3.Bucket(bucket_name)
 
+    # dirnames = _file_list_dirnames(file_list, bucket_root)
+
     bucket_objects = []
     for obj in bucket.objects.filter(Prefix=bucket_root):
-        if obj.key.endswith('/'):
+        # skip directory objects
+        if not os.path.splitext(obj.key)[-1]:
             continue
         bucket_objects.append(obj.key)
 
@@ -174,6 +179,9 @@ def _test_headers(session, bucket_name, bucket_root, expected_headers):
             bucket_name,
             obj.key)
         r = requests.head(object_url)
+        # skip directory redirect objects
+        if 'x-amz-ltd-redirect' in r.headers:
+            continue
         for key, expected_value in expected_headers.items():
             assert r.headers[key] == expected_value
 
@@ -189,6 +197,9 @@ def _test_content_types(session, bucket_name, bucket_root):
     bucket_location = s3.meta.client.get_bucket_location(Bucket=bucket_name)
 
     for obj in bucket.objects.filter(Prefix=bucket_root):
+        # skip directory redirect objects
+        if 'ltd-redirect' in obj.Object().metadata:
+            continue
         guess, _ = mimetypes.guess_type(obj.key)
         object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
             bucket_location['LocationConstraint'],
@@ -197,6 +208,37 @@ def _test_content_types(session, bucket_name, bucket_root):
         if guess is not None:
             r = requests.head(object_url)
             assert r.headers['content-type'] == guess
+
+
+def _file_list_dirnames(file_list, bucket_root):
+    dirnames = [bucket_root]
+    for path in file_list:
+        _d = os.path.dirname(path)
+        if len(_d) > 0:
+            dirnames.append(os.path.join(bucket_root, _d))
+    dirnames = list(set(dirnames))
+    return dirnames
+
+
+def _test_directory_redirects(session, bucket_name, bucket_root, file_list):
+    """Verify that the directory redirect objects exist."""
+    # Make a list of all directories, including the root directory
+    dirnames = _file_list_dirnames(file_list, bucket_root)
+
+    # see http://stackoverflow.com/a/34698521 for making object URLs
+    s3 = session.resource('s3')
+    # bucket = s3.Bucket(bucket_name)
+    bucket_location = s3.meta.client.get_bucket_location(Bucket=bucket_name)
+
+    for dirname in dirnames:
+        # Try to request the object
+        obj = s3.Object(bucket_name, dirname)
+        object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
+            bucket_location['LocationConstraint'],
+            bucket_name,
+            obj.key)
+        r = requests.head(object_url)
+        assert r.headers['x-amz-meta-dir-redirect'] == 'true'
 
 
 def _clean_bucket(session, bucket_name, root_path):

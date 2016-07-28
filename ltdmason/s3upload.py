@@ -16,6 +16,7 @@ log.addHandler(logging.NullHandler())
 
 
 def upload(bucket_name, path_prefix, source_dir,
+           upload_dir_redirect_objects=True,
            surrogate_key=None, acl='public-read',
            cache_control_max_age=31536000,
            aws_access_key_id=None, aws_secret_access_key=None,
@@ -43,6 +44,11 @@ def upload(bucket_name, path_prefix, source_dir,
         Path of the Sphinx HTML build directory on the local file system.
         The contents of this directory are uploaded into the ``/path_prefix/``
         directory of the S3 bucket.
+    upload_dir_redirect_objects : bool, optional
+        A feature flag to enable uploading objects to S3 for every directory.
+        These objects contain headers ``x-amz-meta-dir-redirect=true`` HTTP
+        headers that tell Fastly to issue a 301 redirect from the directory
+        object to the '/index.html' in that directory.
     surrogate_key : str, optional
         The surrogate key to insert in the header of all objects
         in the ``x-amz-meta-surrogate-key`` field. This key is used to purge
@@ -120,6 +126,22 @@ def upload(bucket_name, path_prefix, source_dir,
                          metadata=metadata, acl=acl,
                          cache_control=cache_control)
 
+        # Upload a directory redirect object
+        if upload_dir_redirect_objects is True:
+            bucket_dir_path = os.path.join(path_prefix, bucket_root)
+            bucket_dir_path = bucket_dir_path.rstrip('/')
+            if metadata:
+                redirect_metadata = dict(metadata)
+            else:
+                redirect_metadata = {}
+            redirect_metadata['dir-redirect'] = 'true'
+            _upload_object(bucket_dir_path,
+                           content='',
+                           bucket=bucket,
+                           metadata=redirect_metadata,
+                           acl=acl,
+                           cache_control=cache_control)
+
 
 def _upload_file(local_path, bucket_path, bucket,
                  metadata=None, acl=None, cache_control=None):
@@ -166,6 +188,36 @@ def _upload_file(local_path, bucket_path, bucket,
     obj = bucket.Object(bucket_path)
     # no return status from the upload_file api
     obj.upload_file(local_path, ExtraArgs=extra_args)
+
+
+def _upload_object(bucket_path, bucket, content='',
+                   metadata=None, acl=None, cache_control=None):
+    """Upload an arbitrary object to an S3 bucket.
+
+    Parameters
+    ----------
+    bucket_path : str
+        Destination path (also known as the key name) of the file in the
+        S3 bucket.
+    content : str or bytes
+        Object content, optional
+    bucket : `boto3` Bucket instance
+        S3 bucket.
+    metadata : dict, optional
+        Header metadata values. These keys will appear in headers as
+        ``x-amz-meta-*``.
+    acl : str, optional
+        A pre-canned access control list. See
+        https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
+    cache_control : str, optional
+        The cache-control header value. For example, 'max-age=31536000'.
+        ``'
+    """
+    obj = bucket.Object(bucket_path)
+    obj.put(Body=content,
+            ACL=acl,
+            Metadata=metadata,
+            CacheControl=cache_control)
 
 
 class ObjectManager(object):
@@ -244,6 +296,9 @@ class ObjectManager(object):
         dirnames = []
         for obj in self._bucket.objects.filter(Prefix=prefix):
             dirname = os.path.dirname(obj.key)
+            # if the object is a directory redirect, make it look like a dir
+            if dirname == '':
+                dirname = obj.key + '/'
             rel_dirname = os.path.relpath(dirname, start=prefix)
             dir_parts = rel_dirname.split('/')
             if len(dir_parts) == 1:
@@ -273,12 +328,8 @@ class ObjectManager(object):
         """
         key = os.path.join(self._bucket_root, filename)
         objects = list(self._bucket.objects.filter(Prefix=key))
-        assert len(objects) == 1
-        obj = objects[0]
-        r = obj.delete()
-        if 'Errors' in r:
-            log.error(r)
-            raise S3Error('S3 could not delete {0})'.format(key))
+        for obj in objects:
+            obj.delete()
 
     def delete_directory(self, dirname):
         """Delete a directory (and contents) from the bucket.

@@ -31,7 +31,7 @@ This documentation describes how to use LTD Mason in Travis-based (single repo) 
 
 ****
 
-Copyright 2016 AURA/LSST.
+Copyright 2016-2017 Association of Universities for Research in Astronomy, Inc.
 
 License: MIT.
 

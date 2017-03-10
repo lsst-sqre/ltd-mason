@@ -17,7 +17,7 @@ log.addHandler(logging.NullHandler())
 
 def upload(bucket_name, path_prefix, source_dir,
            upload_dir_redirect_objects=True,
-           surrogate_key=None, acl='public-read',
+           surrogate_key=None, acl=None,
            cache_control_max_age=31536000,
            aws_access_key_id=None, aws_secret_access_key=None,
            aws_profile=None):
@@ -213,11 +213,15 @@ def _upload_object(bucket_path, bucket, content='',
         The cache-control header value. For example, 'max-age=31536000'.
         ``'
     """
+    args = {}
+    if metadata is not None:
+        args['Metadata'] = metadata
+    if acl is not None:
+        args['ACL'] = acl
+    if cache_control is not None:
+        args['CacheControl'] = cache_control
     obj = bucket.Object(bucket_path)
-    obj.put(Body=content,
-            ACL=acl,
-            Metadata=metadata,
-            CacheControl=cache_control)
+    obj.put(Body=content, **args)
 
 
 class ObjectManager(object):

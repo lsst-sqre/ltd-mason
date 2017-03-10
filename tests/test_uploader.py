@@ -315,7 +315,7 @@ def test_upload_via_keeper(demo_manifest, mocker):
         build_resource['bucket_root_dir'],
         mock_product.html_dir,
         surrogate_key=build_resource['surrogate_key'],
-        acl='public-read',
+        acl=None,
         cache_control_max_age=31536000)
 
     mock_confirm.assert_called_once_with(build_resource['self_url'], 'token')

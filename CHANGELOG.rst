@@ -2,8 +2,11 @@
 Change Log
 ##########
 
-Unreleased
-==========
+[0.2.3] - 2017-03-13
+====================
+
+Changed
+-------
 
 - Make ACL-less uploads the default.
   We now expect the *bucket* to have a public-read ACL.

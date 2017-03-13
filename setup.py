@@ -9,7 +9,7 @@ author = 'Jonathan Sick'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/ltd-mason'
-version = '0.2.2'
+version = '0.2.3'
 
 
 def read(filename):
@@ -17,6 +17,7 @@ def read(filename):
         os.path.abspath(os.path.dirname(__file__)),
         filename)
     return open(full_filename, mode='r', encoding='utf-8').read()
+
 
 long_description = read('README.rst')
 

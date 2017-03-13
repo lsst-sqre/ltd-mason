@@ -131,7 +131,7 @@ def upload_via_keeper(manifest, product,
                     build_resource['bucket_root_dir'],
                     product.html_dir,
                     surrogate_key=build_resource['surrogate_key'],
-                    acl='public-read',
+                    acl=None,
                     cache_control_max_age=31536000,
                     **aws_credentials)
     log.debug('Upload complete: {0}:{1}'.format(

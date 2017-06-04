@@ -41,7 +41,7 @@ setup(
     keywords='lsst',
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
     install_requires=['future>=0.15',
-                      'ruamel.yaml>=0.10',
+                      'ruamel.yaml>=0.10,<0.15',
                       'sh>=1.11',
                       'boto3>=1.2',
                       'jsonschema>=2.5',

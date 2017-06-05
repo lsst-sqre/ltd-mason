@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages
 import os
 from io import open
+import versioneer
 
 
 packagename = 'ltd-mason'
@@ -9,7 +10,7 @@ author = 'Jonathan Sick'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/ltd-mason'
-version = '0.2.3'
+# version = '0.2.3'
 
 
 def read(filename):
@@ -24,7 +25,7 @@ long_description = read('README.rst')
 
 setup(
     name=packagename,
-    version=version,
+    version=versioneer.get_version(),
     description=description,
     long_description=long_description,
     url=url,
@@ -40,6 +41,7 @@ setup(
     ],
     keywords='lsst',
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
+    cmdclass=versioneer.get_cmdclass(),
     install_requires=['future>=0.15',
                       'ruamel.yaml>=0.10,<0.15',
                       'sh>=1.11',

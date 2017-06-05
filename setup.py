@@ -10,7 +10,6 @@ author = 'Jonathan Sick'
 author_email = 'jsick@lsst.org'
 license = 'MIT'
 url = 'https://github.com/lsst-sqre/ltd-mason'
-# version = '0.2.3'
 
 
 def read(filename):
@@ -45,7 +44,10 @@ setup(
     install_requires=['future>=0.15',
                       'ruamel.yaml>=0.10,<0.15',
                       'sh>=1.11',
-                      'boto3>=1.2',
+                      # botocore 1.5.60 is known ot have python 2.7 issues
+                      # This temporarily freezes to a working release.
+                      'boto3==1.4.4',
+                      'botocore==1.5.24',
                       'jsonschema>=2.5',
                       'sphinx>=1.4',
                       'requests>=2.9'],

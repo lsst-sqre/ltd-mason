@@ -2,6 +2,18 @@
 Change Log
 ##########
 
+[0.2.4] - 2017-06-05
+====================
+
+Changed
+-------
+
+- Pin ruamel.yaml to versions >=0.10,<0.15.
+  This protects against an API change in 0.15. (See PR #44).
+- Pin botocore to 1.5.24 and boto3 to 1.4.4.
+  We're seeing an issue with botocore 1.5.60 under Python 2.7.
+- Use versioneer for package versioning based on Git tags.
+
 [0.2.3] - 2017-03-13
 ====================
 

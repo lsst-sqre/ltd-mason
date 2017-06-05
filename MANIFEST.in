@@ -3,3 +3,5 @@ include LICENSE
 include manifest_schema.yaml
 recursive-include tests/ *.py *.yaml
 recursive-include test_data/ *.html *.css *.git *.png *.jpg *.rst *.py Makefile
+include versioneer.py
+include ltdmason/_version.py

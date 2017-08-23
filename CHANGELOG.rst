@@ -2,6 +2,16 @@
 Change Log
 ##########
 
+[0.2.5] - 2017-06-23
+====================
+
+Fixed
+-----
+
+- Improved the logging so that only the ``ltdmason`` logger is setup.
+  This will reduce debug logging volume from boto3.
+- ``ObjectManger.list_dirnames_in_directory`` now filters out directories named ``..``, which are artifacts of the listing process (fixes DM-11630).
+
 [0.2.4] - 2017-06-05
 ====================
 

@@ -96,13 +96,18 @@ def upload(bucket_name, path_prefix, source_dir,
     manager = ObjectManager(session, bucket_name, path_prefix)
 
     for (rootdir, dirnames, filenames) in os.walk(source_dir):
+        log.debug('rootdir=%r dirnames=%r filenames=%r',
+                  rootdir, dirnames, filenames)
+
         # name of root directory on S3 bucket
         bucket_root = os.path.relpath(rootdir, start=source_dir)
         if bucket_root in ('.', '/'):
             bucket_root = ''
+        log.debug('bucket_root=%r', bucket_root)
 
         # Delete bucket directories that no longer exist in source
         bucket_dirnames = manager.list_dirnames_in_directory(bucket_root)
+        log.debug('bucket_dirnames=%r', bucket_dirnames)
         for bucket_dirname in bucket_dirnames:
             if bucket_dirname not in dirnames:
                 log.debug(('Deleting bucket directory {0}'.format(
@@ -111,6 +116,7 @@ def upload(bucket_name, path_prefix, source_dir,
 
         # Delete files that no longer exist in source
         bucket_filenames = manager.list_filenames_in_directory(bucket_root)
+        log.debug('bucket_filenames=%r', bucket_dirnames)
         for bucket_filename in bucket_filenames:
             if bucket_filename not in filenames:
                 bucket_filename = os.path.join(bucket_root, bucket_filename)

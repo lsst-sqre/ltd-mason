@@ -123,6 +123,8 @@ def upload_via_keeper(manifest, product,
     # Register the documentation build for this product
     build_resource = _register_build(manifest, keeper_url, keeper_token)
 
+    log.info('Registered build %r', build_resource['self_url'])
+
     # Upload documentation site to S3
     if aws_credentials is None:
         # Fall back to using default AWS credentials the user might have set
@@ -139,6 +141,8 @@ def upload_via_keeper(manifest, product,
 
     # Confirm upload to ltd-keeper
     _confirm_upload(build_resource['self_url'], keeper_token)
+
+    log.info('Finished upload for %r', build_resource['self_url'])
 
 
 def _register_build(manifest, keeper_url, keeper_token):

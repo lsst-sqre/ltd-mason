@@ -17,28 +17,36 @@ from .product import TravisProduct
 from .uploader import upload
 
 
-log = logging.getLogger(__name__)
-log.addHandler(logging.NullHandler())
-
-
 def run():
     """Entrypoint for ltd-mason-travis command."""
     args = parse_args()
 
+    # Setup ltdmason logger
+    ch = logging.StreamHandler()
+    formatter = logging.Formatter(
+        '%(asctime)s %(levelname)8s %(name)s | %(message)s')
+    ch.setFormatter(formatter)
+
+    root_logger = logging.getLogger('ltdmason')
+    root_logger.addHandler(ch)
+
     if args.verbose:
-        logging.basicConfig(level=logging.DEBUG)
+        root_logger.setLevel(level=logging.DEBUG)
     else:
-        logging.basicConfig(level=logging.INFO)
+        root_logger.setLevel(level=logging.INFO)
+
+    # Module logger
+    logger = logging.getLogger(__name__)
 
     # Only build when the env var 'LTD_MASON_BUILD' is set to True
     # This is useful for Travis build matrices; we want to specify
     # exactly which test run to run Mason on.
     mason_build_flag = os.getenv('LTD_MASON_BUILD')
     if mason_build_flag is None:
-        log.info('ltd-mason-travis skipping build')
+        logger.info('ltd-mason-travis skipping build')
         sys.exit(0)
     elif mason_build_flag.lower() != 'true':
-        log.info('ltd-mason-travis skipping build')
+        logger.info('ltd-mason-travis skipping build')
         sys.exit(0)
 
     # Verify this is a branch build on Travis; not a PR build.
@@ -48,7 +56,7 @@ def run():
             'TRAVIS_PULL_REQUEST environment variable not found')
     if travis_pr_flag.lower() != 'false':
         # Silently exit so as not to disturb a Travis CI of code tests
-        log.info('ltd-mason-travis skipping PR build')
+        logger.info('ltd-mason-travis skipping PR build')
         sys.exit(0)
 
     manifest = TravisManifest()

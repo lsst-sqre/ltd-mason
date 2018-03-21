@@ -6,4 +6,4 @@ RUN apk add --no-cache --update python3 && \
     pip3 install ltd-mason==${LTD_MASON_VER} --upgrade --no-cache-dir && \
     rm -rf /root/.cache
 
-ENTRYPOINT ["/usr/bin/ltd-mason-travis"]
+CMD ["/usr/bin/ltd-mason-travis"]

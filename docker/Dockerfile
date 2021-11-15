@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3
 
 ARG LTD_MASON_VER=0.2.5
 

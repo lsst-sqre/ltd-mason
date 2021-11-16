@@ -1,0 +1,28 @@
+name: CI
+
+"on": [push]
+
+jobs:
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+
+      - name: Install
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run tests
+        env:
+          LTD_MASON_TEST_AWS_ID: AKIAJQTXPK2NYX2KHS7Q
+          LTD_MASON_TEST_AWS_SECRET: ${{ secrets.LTD_MASON_TEST_AWS_SECRET }}
+          LTD_MASON_TEST_BUCKET: ${{ secrets.LTD_MASON_TEST_BUCKET }}
+        run: |
+          pytest --cov

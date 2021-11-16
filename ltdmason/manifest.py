@@ -5,19 +5,13 @@ builds of the software itself and to merely tell ltd-mason where the built
 software can be found, and metadata about the versioning of this Stack.
 """
 
-from __future__ import (division, absolute_import, print_function,
-                        unicode_literals)
-from builtins import *  # NOQA
-from future.standard_library import install_aliases
-install_aliases()  # NOQA
-
 import abc
 from urllib.parse import urlparse, urlunparse
 import os
+from pathlib import Path
 
 import jsonschema
 import ruamel.yaml
-import pkg_resources
 
 
 class BaseManifest(object):
@@ -106,14 +100,16 @@ class Manifest(BaseManifest):
     """
     def __init__(self, f):
         super().__init__()
-        data = ruamel.yaml.load(f, ruamel.yaml.RoundTripLoader)
+        yaml = ruamel.yaml.YAML()
+        data = yaml.load(f)
         Manifest.validate(data)
         self.data = data
 
     @property
     def yaml(self):
         """YAML representation of the manifest (:class:`str`)."""
-        return ruamel.yaml.dump(self.data, Dumper=ruamel.yaml.RoundTripDumper)
+        yaml = ruamel.yaml.YAML()
+        return yaml.dump(self.data)
 
     @property
     def doc_repo_url(self):
@@ -182,10 +178,10 @@ class Manifest(BaseManifest):
 
 
 def load_manifest_schema():
-    resource_args = (__name__, '../manifest_schema.yaml')
-    assert pkg_resources.resource_exists(*resource_args)
-    yaml_data = pkg_resources.resource_string(*resource_args)
-    return ruamel.yaml.load(yaml_data)
+    path = Path(__file__).parent / '../manifest_schema.yaml'
+    yaml_data = path.read_text()
+    yaml = ruamel.yaml.YAML()
+    return yaml.load(yaml_data)
 
 
 class TravisManifest(BaseManifest):

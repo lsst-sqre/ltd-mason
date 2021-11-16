@@ -4,20 +4,15 @@ See mock_manifest.yaml; the doc repo is github.com/lsst-sqre/mock-doc and
 the packages are embedded in this repo's test_data/ directory.
 """
 
-from __future__ import (division, absolute_import, print_function,
-                        unicode_literals)
-from builtins import *  # NOQA
-from future.standard_library import install_aliases
-install_aliases()  # NOQA
-
 import os
 import tempfile
 import shutil
+from pathlib import Path
 
-import pkg_resources
 import pytest
 import sh
 import ruamel.yaml
+from ruamel.yaml.compat import StringIO
 
 from ltdmason.product import Product
 from ltdmason.manifest import Manifest
@@ -26,21 +21,22 @@ from ltdmason.manifest import Manifest
 @pytest.fixture(scope='session')
 def mock_manifest():
     """Provide the mock_manifest.yaml test file as a string."""
-    resource_args = (__name__, 'mock_manifest.yaml')
-    assert pkg_resources.resource_exists(*resource_args)
-    yaml_str = pkg_resources.resource_string(*resource_args)
+    path = Path(__file__).parent / "mock_manifest.yaml"
+    yaml_str = path.read_text()
 
     # Patch the mock manifest to turn embedded package dir paths into
     # absolute paths
-    yaml_data = ruamel.yaml.load(yaml_str)
+
+    yaml = ruamel.yaml.YAML()
+    yaml_data = yaml.load(yaml_str)
     pkg_names = ('alpha', 'beta')
     test_dir = os.path.dirname(__file__)
     for n in pkg_names:
         p = os.path.join(test_dir, yaml_data['packages'][n]['dir'])
         yaml_data['packages'][n]['dir'] = p
-    yaml_str = ruamel.yaml.dump(yaml_data)
-
-    return yaml_str
+    stream = StringIO()
+    yaml.dump(yaml_data, stream)
+    return stream.getvalue()
 
 
 @pytest.fixture(scope='session')

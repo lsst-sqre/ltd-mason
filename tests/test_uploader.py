@@ -6,8 +6,9 @@ try:
     from unittest import mock
 except ImportError:
     import mock
+from pathlib import Path
+
 import responses
-import pkg_resources
 import pytest
 
 from ltdmason.manifest import Manifest
@@ -169,9 +170,8 @@ def test_read_aws_credentials_fallback(monkeypatch, missing):
 
 @pytest.fixture
 def demo_manifest():
-    resource_args = (__name__, 'demo_manifest.yaml')
-    assert pkg_resources.resource_exists(*resource_args)
-    yaml_data = pkg_resources.resource_string(*resource_args)
+    path = Path(__file__).parent / "demo_manifest.yaml"
+    yaml_data = path.read_text()
     manifest = Manifest(yaml_data)
     return manifest
 

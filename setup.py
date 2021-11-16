@@ -34,15 +34,12 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3',
     ],
     keywords='lsst',
     packages=find_packages(exclude=['docs', 'tests*', 'data']),
     cmdclass=versioneer.get_cmdclass(),
-    install_requires=['future>=0.15',
-                      'ruamel.yaml>=0.10,<0.15',
+    install_requires=['ruamel.yaml>=0.10,<0.15',
                       'sh>=1.11',
                       # botocore 1.5.60 is known ot have python 2.7 issues
                       # This temporarily freezes to a working release.

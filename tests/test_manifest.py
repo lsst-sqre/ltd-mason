@@ -1,12 +1,7 @@
 """Test ltdmason.manifest."""
 
-from __future__ import (division, absolute_import, print_function,
-                        unicode_literals)
-from builtins import *  # NOQA
-from future.standard_library import install_aliases
-install_aliases()  # NOQA
+from pathlib import Path
 
-import pkg_resources
 import pytest
 from jsonschema import ValidationError
 import ruamel.yaml
@@ -16,10 +11,8 @@ from ltdmason.manifest import Manifest, TravisManifest
 
 @pytest.fixture
 def demo_manifest():
-    resource_args = (__name__, 'demo_manifest.yaml')
-    assert pkg_resources.resource_exists(*resource_args)
-    yaml_data = pkg_resources.resource_string(*resource_args)
-    return yaml_data
+    path = Path(__file__).parent / "demo_manifest.yaml"
+    return path.read_text()
 
 
 @pytest.mark.xfail
@@ -52,7 +45,8 @@ def test_missing_manifest_fields(demo_manifest, key):
     """Test that exceptions are raised when a manifest is missing required
     fields.
     """
-    manifest = ruamel.yaml.load(demo_manifest)
+    yaml = ruamel.yaml.YAML()
+    manifest = yaml.load(demo_manifest)
     del manifest[key]
     with pytest.raises(ValidationError):
         Manifest.validate(manifest)
@@ -63,7 +57,8 @@ def test_missing_manifest_doc_repo_fields(demo_manifest, key):
     """Test that exceptions are raised when a manifest is missing required
     fields in the 'doc_repo' object
     """
-    manifest = ruamel.yaml.load(demo_manifest)
+    yaml = ruamel.yaml.YAML()
+    manifest = yaml.load(demo_manifest)
     del manifest['doc_repo'][key]
     with pytest.raises(ValidationError):
         Manifest.validate(manifest)
@@ -74,7 +69,8 @@ def test_missing_manifest_package_fields(demo_manifest, key):
     """Test that exceptions are raised when a manifest is missing required
     fields in the 'packages.packages.afw' object.
     """
-    manifest = ruamel.yaml.load(demo_manifest)
+    yaml = ruamel.yaml.YAML()
+    manifest = yaml.load(demo_manifest)
     del manifest['packages']['afw'][key]
     with pytest.raises(ValidationError):
         Manifest.validate(manifest)
@@ -82,7 +78,8 @@ def test_missing_manifest_package_fields(demo_manifest, key):
 
 def test_bad_refs_type(demo_manifest):
     """Test that refs is a list."""
-    manifest = ruamel.yaml.load(demo_manifest)
+    yaml = ruamel.yaml.YAML()
+    manifest = yaml.load(demo_manifest)
     manifest['refs'] = 'master'
     with pytest.raises(ValidationError):
         Manifest.validate(manifest)

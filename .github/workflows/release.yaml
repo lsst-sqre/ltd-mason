@@ -1,41 +1,29 @@
-name: CI
+name: Release
 
-"on": [push]
+"on":
+  push:
+    tags: "*"
 
 jobs:
 
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.9"
-
-      - name: Install
-        run: |
-          pip install -r requirements.txt
-
-      - name: Run tests
-        env:
-          LTD_MASON_TEST_AWS_ID: AKIAJQTXPK2NYX2KHS7Q
-          LTD_MASON_TEST_AWS_SECRET: ${{ secrets.LTD_MASON_TEST_AWS_SECRET }}
-          LTD_MASON_TEST_BUCKET: ${{ secrets.LTD_MASON_TEST_BUCKET }}
-        run: |
-          pytest --cov
-
   build:
     runs-on: ubuntu-latest
-    needs: [test]
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+
+      - name: Define the Docker tag
+        id: vars
+        run: echo ::set-output name=tag::$(scripts/docker-tag.sh)
+
+      - name: Print the tag
+        id: print
+        run: echo ${{ steps.vars.outputs.tag }}
 
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -49,8 +37,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          push: false
-          tags: lsstsqre/ltd-mason:latest
+          push: true
+          tags: lsstsqre/ltd-mason:${{ steps.vars.outputs.tag }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 

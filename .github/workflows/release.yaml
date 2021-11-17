@@ -44,7 +44,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: lsstsqre/ltd-mason:${{ steps.vars.outputs.tag }}
+          tags: lsstsqre/ltd-mason:${{ steps.vars.outputs.tag }},lsstsqre/ltd-mason:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
